@@ -1,0 +1,3 @@
+# Hasky Compiler Change Log
+
+> No changes yet. Awaiting first release...
