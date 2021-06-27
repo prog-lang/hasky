@@ -1,0 +1,9 @@
+#!/usr/bin/bash
+
+clear
+echo '===== Compiling ==================================='
+gcc *.c -o test && (
+	echo '===== Running ====================================='
+	./test;
+	rm test
+)
