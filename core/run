@@ -4,6 +4,6 @@ clear
 echo '===== Compiling ==================================='
 gcc *.c -o test && (
 	echo '===== Running ====================================='
-	./test;
+	./test
 	rm test
 )
