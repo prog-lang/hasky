@@ -24,9 +24,9 @@ dependencies:
 
 library:
   source-dirs: lib
-  # build-tool-depends: alex:alex, happy:happy
-  # dependencies:
-  #   - array
+  build-tool-depends: alex:alex #, happy:happy
+  dependencies:
+    - array
 
 executables:
   hasky:
@@ -49,3 +49,5 @@ tests:
       - -with-rtsopts=-N
     dependencies:
       - hasky
+      - directory
+      - filepath

@@ -2,11 +2,10 @@
 
 #include <stdint.h>
 
+namespace rts {
+
 typedef uint8_t Byte;
 typedef int32_t Int;
 typedef double Float;
 
-typedef struct {
-  void *head;
-  void *tail;
-} Pair;
+} // namespace rts
