@@ -14,7 +14,6 @@ author:         Viktor A. Rozenko Voitenko
 maintainer:     sharpvik@gmail.com
 copyright:      2021 Viktor A. Rozenko Voitenko
 license:        MIT
-license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
     README.md
@@ -27,7 +26,6 @@ source-repository head
 library
   exposed-modules:
       Lexer
-      Lib
   other-modules:
       Paths_hasky
   hs-source-dirs:

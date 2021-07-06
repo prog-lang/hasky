@@ -16,7 +16,8 @@ tokens :-
 
   "\"               { \pos _ -> TokenLambda     pos          }
   "."               { \pos _ -> TokenDot        pos          }
-
+  ","               { \pos _ -> TokenComma      pos          }
+  "|"               { \pos _ -> TokenPipe       pos          }
   ":"               { \pos _ -> TokenColon      pos          }
   ";"               { \pos _ -> TokenSemicolon  pos          }
 
@@ -25,6 +26,7 @@ tokens :-
   "["               { \pos _ -> TokenLeftBrace  pos          }
   "]"               { \pos _ -> TokenRightBrace pos          }
 
+  ":-"              { \pos _ -> TokenTypeSign   pos          }
   ":="              { \pos _ -> TokenAssign     pos          }
 
   mod               { \pos _ -> TokenMod        pos          }
@@ -36,8 +38,13 @@ tokens :-
   in                { \pos _ -> TokenIn         pos          }
   do                { \pos _ -> TokenDo         pos          }
   end               { \pos _ -> TokenEnd        pos          }
+  when              { \pos _ -> TokenWhen       pos          }
+  is                { \pos _ -> TokenIs         pos          }
+  then              { \pos _ -> TokenThen       pos          }
+  type              { \pos _ -> TokenType       pos          }
+  alias             { \pos _ -> TokenAlias      pos          }
 
-  @type             { \pos s -> TokenType       pos s        }
+  @type             { \pos s -> TokenTypeName   pos s        }
   @name             { \pos s -> TokenName       pos s        }
   @string           { \pos s -> TokenStr        pos (read s) }
   @integer          { \pos s -> TokenInt        pos (read s) } 
@@ -50,12 +57,15 @@ tokens :-
 data Token
   = TokenLambda AlexPosn
   | TokenDot AlexPosn
+  | TokenComma AlexPosn
+  | TokenPipe AlexPosn
   | TokenColon AlexPosn
   | TokenSemicolon AlexPosn
   | TokenLeftParen AlexPosn
   | TokenRightParen AlexPosn
   | TokenLeftBrace AlexPosn
   | TokenRightBrace AlexPosn
+  | TokenTypeSign AlexPosn
   | TokenAssign AlexPosn
   | TokenMod AlexPosn
   | TokenUse AlexPosn
@@ -66,7 +76,12 @@ data Token
   | TokenIn AlexPosn
   | TokenDo AlexPosn
   | TokenEnd AlexPosn
-  | TokenType AlexPosn String
+  | TokenWhen AlexPosn
+  | TokenIs AlexPosn
+  | TokenThen AlexPosn
+  | TokenType AlexPosn
+  | TokenAlias AlexPosn
+  | TokenTypeName AlexPosn String
   | TokenName AlexPosn String
   | TokenStr AlexPosn String
   | TokenInt AlexPosn Int
