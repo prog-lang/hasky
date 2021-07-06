@@ -5,10 +5,11 @@ module Lexer where
 %wrapper "posn" 
 
 @integer = [0-9]+
+@char    = ' $printable{1,2} '
 @string  = \" ($printable # \")* \"
 @name    = [a-z] [a-zA-Z0-9]*
 @type    = [A-Z] [a-zA-Z0-9]*
-@op      = [=!\/\+\-\*\$\<\>]+
+@op      = [=!\|\/\+\-\*\$\<\>]+
 
 tokens :-
   $white+           ; 
@@ -46,6 +47,7 @@ tokens :-
 
   @type             { \pos s -> TokenTypeName   pos s        }
   @name             { \pos s -> TokenName       pos s        }
+  @char             { \pos s -> TokenChar       pos (read s) }
   @string           { \pos s -> TokenStr        pos (read s) }
   @integer          { \pos s -> TokenInt        pos (read s) } 
   @op               { \pos s -> TokenOp         pos s        }
@@ -83,6 +85,7 @@ data Token
   | TokenAlias AlexPosn
   | TokenTypeName AlexPosn String
   | TokenName AlexPosn String
+  | TokenChar AlexPosn Char
   | TokenStr AlexPosn String
   | TokenInt AlexPosn Int
   | TokenOp AlexPosn String
