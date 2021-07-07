@@ -14,7 +14,6 @@ author:         Viktor A. Rozenko Voitenko
 maintainer:     sharpvik@gmail.com
 copyright:      2021 Viktor A. Rozenko Voitenko
 license:        MIT
-license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
     README.md
@@ -26,13 +25,14 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
+      Lexer
   other-modules:
       Paths_hasky
   hs-source-dirs:
       lib
   build-depends:
-      base >=4.7 && <5
+      array
+    , base >=4.7 && <5
   default-language: Haskell2010
 
 executable hasky
@@ -57,5 +57,7 @@ test-suite hasky-test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , directory
+    , filepath
     , hasky
   default-language: Haskell2010
