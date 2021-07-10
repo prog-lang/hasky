@@ -1,9 +1,14 @@
-import Paths_hasky (version)
-import Data.Version (showVersion)
-import System.Environment (getArgs)
-import Text.Printf (printf)
-import Data.List (intercalate)
-import Lexer (tokenize)
+{-# LANGUAGE RecordWildCards #-}
+
+module Main where
+
+import           Paths_hasky (version)
+import           Data.Version (showVersion)
+import           System.Environment (getArgs)
+import           Text.Printf (printf)
+import           Data.List (intercalate)
+import qualified Lexer
+import qualified Parser
 
 
 
@@ -21,7 +26,12 @@ main = getArgs >>= mode
 mode :: [String] -> IO ()
 mode ["help"]    = usage
 mode ["version"] = putStrLn fullVersion
-mode [file]      = readFile file >>= (print . tokenize)
+mode [file]      = readFile file >>= (showResult . Parser.analyze)
+
+
+showResult:: Either Parser.Error (Lexer.Token, [Lexer.Token]) -> IO ()
+showResult(Left (Parser.Error explanation)) = putStrLn explanation
+showResult(Right (tok, _)) = print tok
 
 
 

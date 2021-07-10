@@ -89,7 +89,77 @@ data Token
   | TokenStr AlexPosn String
   | TokenInt AlexPosn Int
   | TokenOp AlexPosn String
-  deriving (Show, Eq) 
+
+
+instance Show Token where
+  show (TokenLambda _) = "\\"
+  show (TokenDot _) = "."
+  show (TokenComma _) = ","
+  show (TokenPipe _) = "|"
+  show (TokenColon _) = ":"
+  show (TokenSemicolon _) = ";"
+  show (TokenLeftParen _) = "("
+  show (TokenRightParen _) = ")"
+  show (TokenLeftBrace _) = "]"
+  show (TokenRightBrace _) = "["
+  show (TokenTypeSign _) = ":-"
+  show (TokenAssign _) = ":="
+  show (TokenMod _) = "mod"
+  show (TokenUse _) = "use"
+  show (TokenAs _) = "as"
+  show (TokenPub _) = "pub"
+  show (TokenDef _) = "def"
+  show (TokenLet _) = "let"
+  show (TokenIn _) = "in"
+  show (TokenDo _) = "do"
+  show (TokenEnd _) = "end"
+  show (TokenWhen _) = "when"
+  show (TokenIs _) = "is"
+  show (TokenThen _) = "then"
+  show (TokenType _) = "type"
+  show (TokenAlias _) = "alias"
+  show (TokenTypeName _ name) = name
+  show (TokenName _ name) = name
+  show (TokenChar _ char) = show char
+  show (TokenStr _ str) = str
+  show (TokenInt _ int) = show int
+  show (TokenOp _ op) = op
+
+
+instance Eq Token where
+  TokenLambda _ == TokenLambda _ = True
+  TokenDot _ == TokenDot _ = True
+  TokenComma _ == TokenComma _ = True
+  TokenPipe _ == TokenPipe _ = True
+  TokenColon _ == TokenColon _ = True
+  TokenSemicolon _ == TokenSemicolon _ = True
+  TokenLeftParen _ == TokenLeftParen _ = True
+  TokenRightParen _ == TokenRightParen _ = True
+  TokenLeftBrace _ == TokenLeftBrace _ = True
+  TokenRightBrace _ == TokenRightBrace _ = True
+  TokenTypeSign _ == TokenTypeSign _ = True
+  TokenAssign _ == TokenAssign _ = True
+  TokenMod _ == TokenMod _ = True
+  TokenUse _ == TokenUse _ = True
+  TokenAs _ == TokenAs _ = True
+  TokenPub _ == TokenPub _ = True
+  TokenDef _ == TokenDef _ = True
+  TokenLet _ == TokenLet _ = True
+  TokenIn _ == TokenIn _ = True
+  TokenDo _ == TokenDo _ = True
+  TokenEnd _ == TokenEnd _ = True
+  TokenWhen _ == TokenWhen _ = True
+  TokenIs _ == TokenIs _ = True
+  TokenThen _ == TokenThen _ = True
+  TokenType _ == TokenType _ = True
+  TokenAlias _ == TokenAlias _ = True
+  TokenTypeName _ _ == TokenTypeName _ _ = True
+  TokenName _ _ == TokenName _ _ = True
+  TokenChar _ _ == TokenChar _ _ = True
+  TokenStr _ _ == TokenStr _ _ = True
+  TokenInt _ _ == TokenInt _ _ = True
+  TokenOp _ _ == TokenOp _ _ = True
+  _ == _ = False
 
 
 
@@ -98,4 +168,51 @@ data Token
 
 tokenize :: String -> [Token]
 tokenize = alexScanTokens
+
+
+
+-- POSITION
+
+position :: AlexPosn -> (Int, Int)
+position (AlexPn _ line column) = (line, column)
+
+
+tokenPosition :: Token -> (Int, Int)
+tokenPosition (TokenLambda pos) = position pos
+tokenPosition (TokenDot pos) = position pos
+tokenPosition (TokenComma pos) = position pos
+tokenPosition (TokenPipe pos) = position pos
+tokenPosition (TokenColon pos) = position pos
+tokenPosition (TokenSemicolon pos) = position pos
+tokenPosition (TokenLeftParen pos) = position pos
+tokenPosition (TokenRightParen pos) = position pos
+tokenPosition (TokenLeftBrace pos) = position pos
+tokenPosition (TokenRightBrace pos) = position pos
+tokenPosition (TokenTypeSign pos) = position pos
+tokenPosition (TokenAssign pos) = position pos
+tokenPosition (TokenMod pos) = position pos
+tokenPosition (TokenUse pos) = position pos
+tokenPosition (TokenAs pos) = position pos
+tokenPosition (TokenPub pos) = position pos
+tokenPosition (TokenDef pos) = position pos
+tokenPosition (TokenLet pos) = position pos
+tokenPosition (TokenIn pos) = position pos
+tokenPosition (TokenDo pos) = position pos
+tokenPosition (TokenEnd pos) = position pos
+tokenPosition (TokenWhen pos) = position pos
+tokenPosition (TokenIs pos) = position pos
+tokenPosition (TokenThen pos) = position pos
+tokenPosition (TokenType pos) = position pos
+tokenPosition (TokenAlias pos) = position pos
+tokenPosition (TokenTypeName pos _) = position pos
+tokenPosition (TokenName pos _) = position pos
+tokenPosition (TokenChar pos _) = position pos
+tokenPosition (TokenStr pos _) = position pos
+tokenPosition (TokenInt pos _) = position pos
+tokenPosition (TokenOp pos _) = position pos
+
+
+showTokenPosition :: Token -> String
+showTokenPosition token = "line " ++ show line ++ ", column " ++ show column 
+  where (line, column) = tokenPosition token
 }

@@ -1,5 +1,6 @@
 -- Executalbe programs are compiled based on an entrypoint file that has to
--- contain the `main` function and must not have a `mod` declaration.
+-- contain the `mod main` declaration and the `main` function.
+mod main;
 
 use core:io as io;
 use lib;
