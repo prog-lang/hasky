@@ -10,6 +10,7 @@ module Parser
 import           Control.Applicative
 import qualified Lexer 
 import           Lexer (Token, tokenPosition)
+import           Data.Default (def)
 
 
 
@@ -77,36 +78,43 @@ token tok = Parser aux where
         | otherwise = Left $ Error $
             "I was looking for '" ++ show tok
             ++ "', but found '" ++ show t ++ "' at "
-            ++ Lexer.showTokenPosition t ++ "."
+            ++ Lexer.showTokenPosition t ++ ".\n"
     aux [] = Left $ Error $
          "I was looking for '" ++ show tok
         ++ "', but instead you made me stare into the void...\n"
-        ++ "And now that void is staring right back at you!"
+        ++ "And now that void is staring right back at you!\n"
 
 
-tokens :: String -> [Token] -> Parser [Token]
-tokens expressionType expect = Parser $ \input ->
-    case parse (traverse token expect) input of
-        Left (Error err) -> Left $ Error $
-            "On my way through parsing " ++ expressionType ++ ",\n" ++ err
-        result -> result
+tokens :: [Token] -> Parser [Token]
+tokens = traverse token 
+
+
+{- Match a list of tokens with a mandatory semicolon at the end of it. -}
+declaration :: [Token] -> Parser [Token]
+declaration expect = tokens expect <* (token $ Lexer.TokenSemicolon def)
 
 
 
 -- SUPREME PARSERS
 
 
-newtype Mod = Mod String deriving Show
+newtype Mod = Mod String deriving (Show, Eq)
 
 
 modDeclaration :: Parser Mod
-modDeclaration = convert
-   <$> (tokens "the top-level mod declaration"
-    $ [ Lexer.TokenMod $ Lexer.AlexPn 0 0 0
-      , Lexer.TokenName (Lexer.AlexPn 0 0 0) ""
-      , Lexer.TokenSemicolon $ Lexer.AlexPn 0 0 0
-      ])
-    where convert [_, Lexer.TokenName _ name, _] = Mod name
+modDeclaration = Parser $ \input ->
+    case parse parser input of
+        Left (Error err) -> Left $ Error $
+            "On my way through parsing the top-level mod declaration,\n" ++ err
+            ++ "\n> Are you sure you didn't use a capital letter in the name?\n"
+            ++ "> Did you forget a semicolon?\n"
+            ++ "\nHere's an example of a valid mod declaration:\n\n"
+            ++ "    mod myfancymodule;\n"
+        right -> right
+    where
+        convert [_, Lexer.TokenName _ name] = Mod name
+        parser = convert 
+              <$> (declaration [ Lexer.TokenMod def, Lexer.TokenName def def ])
 
 
 

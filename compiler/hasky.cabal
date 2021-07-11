@@ -34,6 +34,7 @@ library
   build-depends:
       array
     , base >=4.7 && <5
+    , data-default
   default-language: Haskell2010
 
 executable hasky

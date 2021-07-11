@@ -27,6 +27,7 @@ library:
   build-tool-depends: alex:alex #, happy:happy
   dependencies:
     - array
+    - data-default
 
 executables:
   hasky:
