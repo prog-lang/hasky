@@ -29,7 +29,7 @@ mode ["version"] = putStrLn fullVersion
 mode [file]      = readFile file >>= (showResult . Parser.analyze)
 
 
-showResult:: Either Parser.Error (Lexer.Token, [Lexer.Token]) -> IO ()
+showResult:: Either Parser.Error (Parser.Mod, [Lexer.Token]) -> IO ()
 showResult(Left (Parser.Error explanation)) = putStrLn explanation
 showResult(Right (tok, _)) = print tok
 

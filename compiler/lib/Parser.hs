@@ -3,6 +3,7 @@
 module Parser 
     ( Parser
     , Error(..)
+    , Mod
     , analyze
     ) where
 
@@ -66,13 +67,13 @@ instance MonadFail Parser where
 
 
 
--- PARSERS
+-- PRIMITIVE PARSERS
 
 
 token :: Token -> Parser Token
 token tok = Parser aux where 
     aux (t:toks)
-        | t == tok = Right (tok, toks)
+        | t == tok = Right (t, toks)
         | otherwise = Left $ Error $
             "I was looking for '" ++ show tok
             ++ "', but found '" ++ show t ++ "' at "
@@ -83,10 +84,35 @@ token tok = Parser aux where
         ++ "And now that void is staring right back at you!"
 
 
+tokens :: String -> [Token] -> Parser [Token]
+tokens expressionType expect = Parser $ \input ->
+    case parse (traverse token expect) input of
+        Left (Error err) -> Left $ Error $
+            "On my way through parsing " ++ expressionType ++ ",\n" ++ err
+        result -> result
+
+
+
+-- SUPREME PARSERS
+
+
+newtype Mod = Mod String deriving Show
+
+
+modDeclaration :: Parser Mod
+modDeclaration = convert
+   <$> (tokens "the top-level mod declaration"
+    $ [ Lexer.TokenMod $ Lexer.AlexPn 0 0 0
+      , Lexer.TokenName (Lexer.AlexPn 0 0 0) ""
+      , Lexer.TokenSemicolon $ Lexer.AlexPn 0 0 0
+      ])
+    where convert [_, Lexer.TokenName _ name, _] = Mod name
+
+
 
 -- ANALYZE
 
 
-analyze :: String -> Either Error (Token, [Token])
+analyze :: String -> Either Error (Mod, [Token])
 analyze = parse parser . Lexer.tokenize where
-    parser = token $ Lexer.TokenMod $ Lexer.AlexPn 0 0 0
+    parser = modDeclaration

@@ -118,12 +118,12 @@ instance Show Token where
   show (TokenThen _) = "then"
   show (TokenType _) = "type"
   show (TokenAlias _) = "alias"
-  show (TokenTypeName _ name) = name
-  show (TokenName _ name) = name
-  show (TokenChar _ char) = show char
-  show (TokenStr _ str) = str
-  show (TokenInt _ int) = show int
-  show (TokenOp _ op) = op
+  show (TokenTypeName _ name) = "type name"
+  show (TokenName _ _) = "name"
+  show (TokenChar _ char) = "character"
+  show (TokenStr _ str) = "string"
+  show (TokenInt _ int) = "integer"
+  show (TokenOp _ op) = "operator"
 
 
 instance Eq Token where
