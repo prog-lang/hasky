@@ -104,6 +104,13 @@ type ScopedName = [String]  -- e.g. core:io = ["core", "io"]
 type Mod = ScopedName;
 
 
+scopedName :: Parser ScopedName
+scopedName 
+    = map convert
+   <$> sepBy (token $ TokenColon def) (token $ TokenName def def)
+    where convert (TokenName _ name) = name
+
+
 modDeclaration :: Parser Mod
 modDeclaration = Parser $ \input ->
     case parse parser input of
@@ -124,18 +131,10 @@ data Use
     deriving (Show, Eq)
 
 
-scopedName :: Parser ScopedName
-scopedName 
-    = map convert
-   <$> sepBy (token $ TokenColon def) (token $ TokenName def def)
-    where convert (TokenName _ name) = name
-
-
 justUse :: Parser Use
 justUse = JustUse <$> (token (TokenUse def) *> scopedName)
 
 
--- sequenceA [ scopedName, token $ TokenAs def, token $ TokenName def def ]
 useAs :: Parser Use
 useAs = Parser $ \input -> do 
     (scoped, input') <- parse scopedNameParser input

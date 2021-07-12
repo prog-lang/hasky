@@ -89,10 +89,10 @@ tcParseConstDefinition :: TestTree
 tcParseConstDefinition = testGroup "Parse const definition"
     [ testCase "EOF"
         (let Left (Error err) = 
-                 lexparse Parser.useDeclaration "pub def magic := 42"
+                 lexparse Parser.definition "pub def magic := 42"
           in null err @?= False)
     , testCase "Normal"
         (let Right (result, _) = 
-                 lexparse Parser.useDeclaration "pub def magic := 42;"
-          in result @?= UseAs ["core", "io"] "io")
+                 lexparse Parser.definition "pub def magic := 42;"
+          in result @?= PubDef "magic" (Int 42))
     ]
