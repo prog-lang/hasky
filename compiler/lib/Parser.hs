@@ -1,15 +1,10 @@
 {-# LANGUAGE FlexibleInstances #-}
 
-module Parser 
-    ( Parser
-    , Error(..)
-    , Mod
-    , analyze
-    ) where
+module Parser where
 
 import           Control.Applicative
 import qualified Lexer 
-import           Lexer (Token, tokenPosition)
+import           Lexer (Token(..), tokenPosition, tokenize)
 import           Data.Default (def)
 
 
@@ -90,8 +85,14 @@ tokens = traverse token
 
 
 {- Match a list of tokens with a mandatory semicolon at the end of it. -}
-declaration :: [Token] -> Parser [Token]
-declaration expect = tokens expect <* (token $ Lexer.TokenSemicolon def)
+declaration :: Parser a -> Parser a
+declaration = (<* token (TokenSemicolon def))
+
+
+sepBy :: Parser a   -- Parser for the separators
+      -> Parser b   -- Parser for elements
+      -> Parser [b]
+sepBy sep element = (:) <$> element <*> many (sep *> element) <|> pure []
 
 
 
@@ -112,15 +113,62 @@ modDeclaration = Parser $ \input ->
             ++ "    mod myfancymodule;\n"
         right -> right
     where
-        convert [_, Lexer.TokenName _ name] = Mod name
-        parser = convert 
-              <$> (declaration [ Lexer.TokenMod def, Lexer.TokenName def def ])
+        convert [_, TokenName _ name] = Mod name
+        parser = convert <$> (declaration $ tokens [ TokenMod def, TokenName def def ])
+
+
+
+type ScopedName = [String]  -- e.g. core:io = ["core", "io"]
+
+data Use 
+    = JustUse ScopedName       -- use lib;
+    | UseAs ScopedName String  -- use core:io as io;
+    deriving (Show, Eq)
+
+
+scopedName :: Parser ScopedName
+scopedName 
+    = map convert
+   <$> sepBy (token $ TokenColon def) (token $ TokenName def def)
+    where convert (TokenName _ name) = name
+
+
+justUse :: Parser Use
+justUse = JustUse <$> (token (TokenUse def) *> scopedName)
+
+
+-- sequenceA [ scopedName, token $ TokenAs def, token $ TokenName def def ]
+useAs :: Parser Use
+useAs = Parser $ \input -> do 
+    (scoped, input') <- parse scopedNameParser input
+    (rename, input'') <- parse renameParser input'
+    Right (UseAs scoped rename, input'')
+        where
+            scopedNameParser = token (TokenUse def) *> scopedName
+            renameParser = renameConverter 
+                        <$> (token (TokenAs def) 
+                         *> (token $ TokenName def def))
+            renameConverter (TokenName _ name) = name
+
+
+useDeclaration :: Parser Use
+useDeclaration = Parser $ \input ->
+    case parse (declaration (useAs <|> justUse)) input of
+        Left (Error err) -> Left $ Error $
+            "On my way through parsing your use statement,\n" ++ err
+            ++ "\n> Check formatting in this use statement!"
+            ++ "\n> Make sure you didn't forget a semicolon at the end!\n"
+            ++ "\nHere's a few examples of correct use statements:\n"
+            ++ "\n    use core:io as io;"
+            ++ "\n    use core:io;"
+            ++ "\n    use myfancymodule;\n"
+        right -> right
 
 
 
 -- ANALYZE
 
 
-analyze :: String -> Either Error (Mod, [Token])
-analyze = parse parser . Lexer.tokenize where
-    parser = modDeclaration
+analyze :: String -> Either Error (Use, [Token])
+analyze = parse parser . tokenize where
+    parser = useDeclaration
