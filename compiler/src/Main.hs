@@ -29,9 +29,9 @@ mode ["version"] = putStrLn fullVersion
 mode [file]      = readFile file >>= (showResult . Parser.analyze)
 
 
-showResult:: Either Parser.Error (Parser.Use, [Lexer.Token]) -> IO ()
+showResult:: Either Parser.Error (Parser.Mod, [Lexer.Token]) -> IO ()
 showResult(Left (Parser.Error explanation)) = putStrLn explanation
-showResult(Right (use, _)) = print use
+showResult(Right (m, _)) = print m
 
 
 

@@ -92,14 +92,16 @@ declaration = (<* token (TokenSemicolon def))
 sepBy :: Parser a   -- Parser for the separators
       -> Parser b   -- Parser for elements
       -> Parser [b]
-sepBy sep element = (:) <$> element <*> many (sep *> element) <|> pure []
+sepBy sep element = (:) <$> element <*> many (sep *> element)
 
 
 
 -- SUPREME PARSERS
 
 
-newtype Mod = Mod String deriving (Show, Eq)
+type ScopedName = [String]  -- e.g. core:io = ["core", "io"]
+
+type Mod = ScopedName;
 
 
 modDeclaration :: Parser Mod
@@ -112,13 +114,9 @@ modDeclaration = Parser $ \input ->
             ++ "\nHere's an example of a valid mod declaration:\n\n"
             ++ "    mod myfancymodule;\n"
         right -> right
-    where
-        convert [_, TokenName _ name] = Mod name
-        parser = convert <$> (declaration $ tokens [ TokenMod def, TokenName def def ])
+    where parser = declaration $ token (TokenMod def) *> scopedName
 
 
-
-type ScopedName = [String]  -- e.g. core:io = ["core", "io"]
 
 data Use 
     = JustUse ScopedName       -- use lib;
@@ -169,6 +167,6 @@ useDeclaration = Parser $ \input ->
 -- ANALYZE
 
 
-analyze :: String -> Either Error (Use, [Token])
+analyze :: String -> Either Error (Mod, [Token])
 analyze = parse parser . tokenize where
-    parser = useDeclaration
+    parser = modDeclaration

@@ -15,6 +15,7 @@ main :: IO ()
 main = defaultMain $ testGroup "Parser tests"
     [ tcParseMod
     , tcParseUse
+    , tcParseConstDefinition
     ]
 
 
@@ -31,7 +32,7 @@ lexparse parser = parse parser . tokenize
 
 
 tcParseMod :: TestTree
-tcParseMod = testGroup "Parse mod declaration"
+tcParseMod = testGroup "Parse 'mod' declaration"
     [ testCase "EOF"
         (let Left (Error err) = 
                  lexparse Parser.modDeclaration "mod myfancymodule"
@@ -40,19 +41,27 @@ tcParseMod = testGroup "Parse mod declaration"
         (let Left (Error err) = 
                  lexparse Parser.modDeclaration "mod Core;"
           in null err @?= False)
+    , testCase "Name begins with a colon"
+        (let Left (Error err) = 
+                 lexparse Parser.modDeclaration "mod :core:io;"
+          in null err @?= False)
+    , testCase "Double-colon in the middle of the name"
+        (let Left (Error err) = 
+                 lexparse Parser.modDeclaration "mod core::io;"
+          in null err @?= False)
     , testCase "Normal"
-        (let Right (Mod [modname], _) = 
+        (let Right ([modname], _) = 
                  lexparse Parser.modDeclaration "mod core;"
           in modname @?= "core")
     , testCase "Normal but scoped"
-        (let Right (Mod modname, _) = 
+        (let Right (modname, _) = 
                  lexparse Parser.modDeclaration "mod core:io;"
           in modname @?= ["core", "io"])
     ]
 
 
 tcParseUse :: TestTree
-tcParseUse = testGroup "Parse use statement"
+tcParseUse = testGroup "Parse 'use' statement"
     [ testCase "EOF"
         (let Left (Error err) = 
                  lexparse Parser.useDeclaration "use myfancymodule"
@@ -72,5 +81,18 @@ tcParseUse = testGroup "Parse use statement"
     , testCase "Normal but scoped and renamed"
         (let Right (result, _) = 
                  lexparse Parser.useDeclaration "use core:io as io;"
+          in result @?= UseAs ["core", "io"] "io")
+    ]
+
+
+tcParseConstDefinition :: TestTree
+tcParseConstDefinition = testGroup "Parse const definition"
+    [ testCase "EOF"
+        (let Left (Error err) = 
+                 lexparse Parser.useDeclaration "pub def magic := 42"
+          in null err @?= False)
+    , testCase "Normal"
+        (let Right (result, _) = 
+                 lexparse Parser.useDeclaration "pub def magic := 42;"
           in result @?= UseAs ["core", "io"] "io")
     ]
