@@ -21,13 +21,13 @@ void Machine_sweep(Machine *machine) {
   Value **head = &machine->head;
   while (*head) {
     if ((*head)->reached) { // this Value has been marked and should be kept
-      (*head)->reached = true;
+      (*head)->reached = false;
       head = &(*head)->next;
       continue;
     }
 
     Value *unreached = *head; // this Value is unreachable and must be freed
-    head = &unreached->next;
+    *head = unreached->next;
     unreached->free(unreached);
     machine->allocated--;
   }
