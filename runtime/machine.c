@@ -1,5 +1,4 @@
 #include "machine.h"
-#include <stdio.h>
 
 Machine *Machine_new() {
   Machine *machine = malloc(sizeof(Machine));

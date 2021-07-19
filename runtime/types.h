@@ -1,7 +1,9 @@
 #pragma once
 
+#include "kaboom.h"
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 typedef enum {
@@ -10,25 +12,50 @@ typedef enum {
   TypeTagged,
 } Type;
 
-typedef struct sValue {
+typedef struct baseValue {
   Type type;
-  union {
-    uint8_t byte;
-    uint32_t integer;
-    struct {
-      const char *tag;
-      void *value;
-    };
-  };
-
   /* GC stuff. */
-  bool reached;                  // bool flag to mark reachable Values
-  struct sValue *next;           // next allocated Value
-  void (*mark)(struct sValue *); // mark knows how to mark this Value
-  void (*free)(struct sValue *); // free knows how to free this Value
+  bool reached;                     // bool flag to mark reachable Values
+  struct baseValue *next;           // next allocated Value
+  void (*mark)(struct baseValue *); // mark knows how to mark this Value
+  void (*free)(struct baseValue *); // free knows how to free this Value
 } Value;
 
-Value *Value_new();
+typedef struct {
+  /* Mandatory prelude. */
+  Type type;
+  bool reached;
+  Value *next;
+  void (*mark)(Value *);
+  void (*free)(Value *);
+
+  uint32_t value;
+} ValueInt;
+
+typedef struct {
+  /* Mandatory prelude. */
+  Type type;
+  bool reached;
+  Value *next;
+  void (*mark)(Value *);
+  void (*free)(Value *);
+
+  uint8_t value;
+} ValueByte;
+
+typedef struct {
+  /* Mandatory prelude. */
+  Type type;
+  bool reached;
+  Value *next;
+  void (*mark)(Value *);
+  void (*free)(Value *);
+
+  const char *tag;
+  void *value;
+} ValueTagged;
+
 Value *Value_print(Value *value);
-Value *Byte_new(uint8_t byte);
-Value *Int_new(uint32_t integer);
+ValueByte *Byte_new(uint8_t byte);
+ValueInt *Int_new(uint32_t integer);
+ValueTagged *Tagged_new(const char *tag, void *value);

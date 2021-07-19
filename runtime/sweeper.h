@@ -1,7 +1,10 @@
 #pragma once
 
+#include "config.h"
 #include "stack.h"
+#include "stdbool.h"
 #include "types.h"
+#include <stdio.h>
 
 typedef struct {
   Value *head;

@@ -1,8 +1,6 @@
 #include "assert.h"
 
-void assert(bool condition, const char *message) {
-  if (!condition) {
-    printf("%s\n", message);
-    exit(1);
-  }
+void assert(bool condition, char *message) {
+  if (!condition)
+    kaboom(message);
 }

@@ -1,7 +1,7 @@
 #include "operations.h"
-#include "types.h"
 
 void add(Stack *stack) {
-  Stack_push(stack,
-             Int_new(Stack_pop(stack)->integer + Stack_pop(stack)->integer));
+  ValueInt *x = (ValueInt *)Stack_pop(stack);
+  ValueInt *y = (ValueInt *)Stack_pop(stack);
+  Stack_push(stack, (Value *)Int_new(x->value + y->value));
 }

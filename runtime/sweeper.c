@@ -1,6 +1,4 @@
 #include "sweeper.h"
-#include "config.h"
-#include "stdbool.h"
 
 Sweeper *Sweeper_new() {
   Sweeper *sweeper = malloc(sizeof(Sweeper));
