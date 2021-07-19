@@ -13,7 +13,4 @@ void Machine_push(Machine *machine, Value *value) {
   Stack_push(machine->stack, value);
 }
 
-Value *Machine_pop(Machine *machine) {
-  Value *value = Stack_pop(machine->stack);
-  return value;
-}
+Value *Machine_pop(Machine *machine) { return Stack_pop(machine->stack); }
