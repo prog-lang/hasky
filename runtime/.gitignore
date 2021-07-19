@@ -1,4 +1,4 @@
-_main.*
+_main.c
 *.out
 *.bin
 *.exe
