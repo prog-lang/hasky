@@ -1,10 +1,9 @@
 #pragma once
 
 #include "assert.h"
+#include "config.h"
 #include "types.h"
 #include <stdlib.h>
-
-#define MAX_STACK_SIZE 2048
 
 typedef struct {
   Value *items[MAX_STACK_SIZE];

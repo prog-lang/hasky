@@ -1,17 +1,12 @@
 #pragma once
 
 #include "stack.h"
+#include "sweeper.h"
 #include "types.h"
-
-#define INITIAL_GC_THRESHOLD 20
 
 typedef struct {
   Stack *stack;
-
-  /* GC stuff. */
-  Value *head;
-  size_t allocated;
-  size_t threshold;
+  Sweeper *sweeper;
 } Machine;
 
 Machine *Machine_new();

@@ -3,8 +3,6 @@
 #include "stack.h"
 #include "types.h"
 
-#define INITIAL_GC_THRESHOLD 20
-
 typedef struct {
   Value *head;
   size_t allocated;

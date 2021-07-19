@@ -1,11 +1,12 @@
 #include "sweeper.h"
+#include "config.h"
 #include "stdbool.h"
 
-Sweeper *Sweeper_new(size_t threshold) {
+Sweeper *Sweeper_new() {
   Sweeper *sweeper = malloc(sizeof(Sweeper));
   sweeper->head = NULL;
   sweeper->allocated = 0;
-  sweeper->threshold = threshold;
+  sweeper->threshold = INITIAL_GC_THRESHOLD;
   return sweeper;
 }
 
@@ -23,10 +24,6 @@ void Sweeper_mark(Sweeper *sweeper, Stack *stack) {
   }
 }
 
-/* Sweeper linked list of allocated values:
- * [1] -> [2] -> [3] -> [4] -> [5] -> NULL
- *  ^ head
- */
 void Sweeper_sweep(Sweeper *sweeper) {
   Value **value = &sweeper->head;
   while (*value) {
@@ -43,10 +40,15 @@ void Sweeper_sweep(Sweeper *sweeper) {
 }
 
 void Sweeper_collect_garbage(Sweeper *sweeper, Stack *stack) {
+  size_t beforeGC = sweeper->allocated;
   Sweeper_mark(sweeper, stack);
   Sweeper_sweep(sweeper);
   sweeper->threshold =
       sweeper->allocated ? sweeper->allocated * 2 : INITIAL_GC_THRESHOLD;
+  if (DEBUG)
+    printf("SWEPT %ld, KEPT %ld, NEW THRESHOLD %ld\n",
+           beforeGC - sweeper->allocated, sweeper->allocated,
+           sweeper->threshold);
 }
 
 void Sweeper_may_collect_garbage(Sweeper *sweeper, Stack *stack) {
