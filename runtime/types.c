@@ -48,6 +48,8 @@ void Closure_free(Value *value) {
   free(lambda);
 }
 
+// TODO: apply should potentially create a *copy* of this Closure instead of
+// mutating it in-place.
 void Closure_apply(ValueClosure *closure, Value *arg) {
   assert(closure->argi < closure->argc, "Argument overflow in closure!");
   closure->args[closure->argi++] = arg;

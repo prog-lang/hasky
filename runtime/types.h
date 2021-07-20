@@ -13,57 +13,45 @@ typedef enum {
   TypeClosure,
 } Type;
 
+#define GCstuff                                                                \
+  bool reached;                                                                \
+  struct baseValue *next;                                                      \
+  void (*mark)(struct baseValue *);                                            \
+  void (*free)(struct baseValue *)
+
+#define ValuePrelude                                                           \
+  Type type;                                                                   \
+  GCstuff
+
+// Value is a base "class" that only contains common fields like Type and GC
+// stuff. The ValuePrelude macro above encompasses those common fields.
+//
+// > The ValuePrelude must be inserted *at the very top* of each Value subclass.
+//
+// Any runtime value can be down-casted into Value because of that, which
+// allows us to fake polymorphism.
 typedef struct baseValue {
-  Type type;
-  /* GC stuff. */
-  bool reached;                     // bool flag to mark reachable Values
-  struct baseValue *next;           // next allocated Value
-  void (*mark)(struct baseValue *); // mark knows how to mark this Value
-  void (*free)(struct baseValue *); // free knows how to free this Value
+  ValuePrelude;
 } Value;
 
 typedef struct {
-  /* Mandatory prelude. */
-  Type type;
-  bool reached;
-  Value *next;
-  void (*mark)(Value *);
-  void (*free)(Value *);
-
+  ValuePrelude;
   uint32_t value;
 } ValueInt;
 
 typedef struct {
-  /* Mandatory prelude. */
-  Type type;
-  bool reached;
-  Value *next;
-  void (*mark)(Value *);
-  void (*free)(Value *);
-
+  ValuePrelude;
   uint8_t value;
 } ValueByte;
 
 typedef struct {
-  /* Mandatory prelude. */
-  Type type;
-  bool reached;
-  Value *next;
-  void (*mark)(Value *);
-  void (*free)(Value *);
-
+  ValuePrelude;
   const char *tag;
   void *value;
 } ValueTagged;
 
 typedef struct closureValue {
-  /* Mandatory prelude. */
-  Type type;
-  bool reached;
-  Value *next;
-  void (*mark)(Value *);
-  void (*free)(Value *);
-
+  ValuePrelude;
   size_t argi;  // arg index
   size_t argc;  // arg count
   Value **args; // array of pointers to Value where closure stores arguments
