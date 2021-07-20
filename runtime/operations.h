@@ -3,4 +3,5 @@
 #include "stack.h"
 #include "types.h"
 
-void add(Stack *stack);
+Value *dummy(ValueClosure *);
+Value *add(ValueClosure *);

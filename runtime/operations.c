@@ -1,7 +1,7 @@
 #include "operations.h"
 
-void add(Stack *stack) {
-  ValueInt *x = (ValueInt *)Stack_pop(stack);
-  ValueInt *y = (ValueInt *)Stack_pop(stack);
-  Stack_push(stack, (Value *)Int_new(x->value + y->value));
+Value *add(ValueClosure *closure) {
+  ValueInt *x = (ValueInt *)(closure->args[0]);
+  ValueInt *y = (ValueInt *)(closure->args[1]);
+  return (Value *)Int_new(x->value + y->value);
 }

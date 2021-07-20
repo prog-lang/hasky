@@ -1,6 +1,6 @@
 #pragma once
 
-#include "kaboom.h"
+#include "assert.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -10,6 +10,7 @@ typedef enum {
   TypeByte,
   TypeInt,
   TypeTagged,
+  TypeClosure,
 } Type;
 
 typedef struct baseValue {
@@ -55,7 +56,22 @@ typedef struct {
   void *value;
 } ValueTagged;
 
-Value *Value_print(Value *value);
+typedef struct closureValue {
+  /* Mandatory prelude. */
+  Type type;
+  bool reached;
+  Value *next;
+  void (*mark)(Value *);
+  void (*free)(Value *);
+
+  size_t argi;  // arg index
+  size_t argc;  // arg count
+  Value **args; // array of pointers to Value where closure stores arguments
+  void (*apply)(struct closureValue *, Value *);
+  Value *(*exec)(struct closureValue *);
+} ValueClosure;
+
 ValueByte *Byte_new(uint8_t byte);
 ValueInt *Int_new(uint32_t integer);
 ValueTagged *Tagged_new(const char *tag, void *value);
+ValueClosure *Closure_new(const size_t argc, Value *(*exec)(ValueClosure *));
