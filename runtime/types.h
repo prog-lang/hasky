@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef enum {
   TypeByte,
@@ -55,7 +56,7 @@ typedef struct closureValue {
   size_t argi;  // arg index
   size_t argc;  // arg count
   Value **args; // array of pointers to Value where closure stores arguments
-  void (*apply)(struct closureValue *, Value *);
+  struct closureValue *(*apply)(struct closureValue *, Value *);
   Value *(*exec)(struct closureValue *);
 } ValueClosure;
 

@@ -48,11 +48,12 @@ void Closure_free(Value *value) {
   free(lambda);
 }
 
-// TODO: apply should potentially create a *copy* of this Closure instead of
-// mutating it in-place.
-void Closure_apply(ValueClosure *closure, Value *arg) {
-  assert(closure->argi < closure->argc, "Argument overflow in closure!");
-  closure->args[closure->argi++] = arg;
+ValueClosure *Closure_apply(ValueClosure *src, Value *arg) {
+  assert(src->argi < src->argc, "Argument overflow in closure!");
+  ValueClosure *dest = malloc(sizeof(ValueClosure));
+  memcpy(dest, src, sizeof(ValueClosure));
+  dest->args[dest->argi++] = arg;
+  return dest;
 }
 
 ValueClosure *Closure_new(const size_t argc, Value *(*exec)(ValueClosure *)) {
