@@ -11,5 +11,5 @@ pub def magic := 42;
 -- parsing and compilation.
 pub def first := \x. \y. x;
 
-pub def greet := \x. io:println (++ "hello, " x);
+pub def greet := \x. "hello, " ++ x |> io:println;
 

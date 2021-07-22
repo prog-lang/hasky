@@ -25,7 +25,7 @@ type Pair a b := Pair a b;
 type List a := Head a (List a) | Nil;
 ```
 
-Result kinds:
+Result types:
 
 ```hs
 type Maybe a := Some a | None;
