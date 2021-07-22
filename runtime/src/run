@@ -1,0 +1,3 @@
+#!/usr/bin/bash
+
+gcc *.c ../lib/*.c && (./a.out ; rm a.out)

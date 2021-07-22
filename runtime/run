@@ -1,3 +1,0 @@
-#!/usr/bin/bash
-
-gcc *.c && (./a.out ; rm a.out)

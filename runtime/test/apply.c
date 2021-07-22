@@ -32,8 +32,8 @@
  *
  */
 
-#include "../operations.h"
-#include "../types.h"
+#include "../lib/operations.h"
+#include "../lib/types.h"
 
 int main(void) {
   ValueClosure *a = Closure_new(2, add);
