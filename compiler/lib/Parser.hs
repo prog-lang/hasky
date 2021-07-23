@@ -2,21 +2,22 @@
 
 module Parser where
 
-import           Control.Applicative
 import qualified Lexer 
-import           Lexer (Token(..), tokenPosition, tokenize)
-import           Data.Default (def)
+import Lexer (Token(..), tokenPosition, tokenize)
+import Highlight (highlight)
+import Control.Applicative
+import Data.Default (def)
 
 
 
 -- ERROR TYPE
 
 
-newtype Error = Error String
+data Error = Error (Int, Int) String
 
 
 instance Alternative (Either Error) where
-    empty = Left $ Error "Empty error."
+    empty = Left $ Error (0, 0) "Empty error."
     Left _ <|> e2 = e2
     e1 <|> _ = e1
 
@@ -59,7 +60,7 @@ instance Monad Parser where
 
 
 instance MonadFail Parser where
-    fail message = Parser $ \_ -> Left $ Error message
+    fail message = Parser $ \_ -> Left $ Error (0, 0) message
 
 
 
@@ -70,11 +71,11 @@ token :: Token -> Parser Token
 token tok = Parser aux where 
     aux (t:toks)
         | t == tok = Right (t, toks)
-        | otherwise = Left $ Error $
+        | otherwise = Left $ Error (tokenPosition t) $
             "I was looking for '" ++ show tok
             ++ "', but found '" ++ show t ++ "' at "
             ++ Lexer.showTokenPosition t ++ ".\n"
-    aux [] = Left $ Error $
+    aux [] = Left $ Error (0, 0) $
          "I was looking for '" ++ show tok
         ++ "', but instead you made me stare into the void...\n"
         ++ "And now that void is staring right back at you!\n"
@@ -114,7 +115,7 @@ scopedName
 modDeclaration :: Parser Mod
 modDeclaration = Parser $ \input ->
     case parse parser input of
-        Left (Error err) -> Left $ Error $
+        Left (Error pos err) -> Left $ Error pos $
             "On my way through parsing the top-level mod declaration,\n" ++ err
             ++ "\n> Are you sure you didn't use a capital letter in the name?\n"
             ++ "> Did you forget a semicolon?\n"
@@ -151,7 +152,7 @@ useAs = Parser $ \input -> do
 useDeclaration :: Parser Use
 useDeclaration = Parser $ \input ->
     case parse (declaration (useAs <|> justUse)) input of
-        Left (Error err) -> Left $ Error $
+        Left (Error pos err) -> Left $ Error pos $
             "On my way through parsing your use statement,\n" ++ err
             ++ "\n> Check formatting in this use statement!"
             ++ "\n> Make sure you didn't forget a semicolon at the end!\n"
@@ -166,6 +167,9 @@ useDeclaration = Parser $ \input ->
 -- ANALYZE
 
 
-analyze :: String -> Either Error (Mod, [Token])
-analyze = parse parser . tokenize where
-    parser = modDeclaration
+analyze :: String -> String
+analyze input = 
+    case parse parser $ tokenize input of 
+        Left (Error pos err) -> highlight pos input ++ err  
+        Right (parsed, _) -> show parsed
+    where parser = modDeclaration

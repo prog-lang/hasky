@@ -26,12 +26,7 @@ main = getArgs >>= mode
 mode :: [String] -> IO ()
 mode ["help"]    = usage
 mode ["version"] = putStrLn fullVersion
-mode [file]      = readFile file >>= (showResult . Parser.analyze)
-
-
-showResult:: Either Parser.Error (Parser.Mod, [Lexer.Token]) -> IO ()
-showResult(Left (Parser.Error explanation)) = putStrLn explanation
-showResult(Right (m, _)) = print m
+mode [file]      = readFile file >>= (putStrLn . Parser.analyze)
 
 
 
