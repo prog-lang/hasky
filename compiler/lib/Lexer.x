@@ -93,6 +93,17 @@ data Token
     | TokenOp AlexPosn String
 
 
+unpackString :: Token -> String
+unpackString (TokenTypeName _ str) = str
+unpackString (TokenName _ str) = str
+unpackString (TokenStr _ str) = str
+unpackString (TokenOp _ str) = str
+
+
+unpackInt :: Token -> Int
+unpackInt (TokenInt _ int) = int
+
+
 instance Show Token where
     show (TokenLambda _) = "\\"
     show (TokenDot _) = "."
