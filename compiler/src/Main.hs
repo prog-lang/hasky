@@ -21,7 +21,7 @@ mode :: [String] -> IO ()
 mode ["help"   ] = usage
 mode ["version"] = putStrLn fullVersion
 mode ["compile", file] =
-  readFile file >>= (putStrLn . Parser.analyze Parser.definition)
+  readFile file >>= (putStrLn . Parser.analyze Parser.modParser)
 mode _ = usage
 
 -- INFO

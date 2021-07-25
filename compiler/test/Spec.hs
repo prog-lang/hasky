@@ -129,7 +129,7 @@ tcParseModule = testGroup
   [ testGroup
     "Normal Tests"
     [ testCase
-        "Name, 1 import and one def"
+        "Name, 1 import and one definition"
         (let Right (result, _) = lexparse
                Parser.modParser
                "mod alex:vic; use core:io; def magic := 42;"
@@ -147,7 +147,7 @@ tcParseModule = testGroup
        in  null err @?= False
       )
     , testCase
-      "Use statement after Def"
+      "Use statement after definition"
       (assertLeft $ lexparse Parser.modParser
                              "mod alex:vic; def magic := 42; use core:io;"
       )

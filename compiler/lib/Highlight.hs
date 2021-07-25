@@ -5,6 +5,7 @@ module Highlight
 import           Text.Printf                    ( printf )
 
 highlight :: (Int, Int) -> String -> String
+highlight (0   , 0  ) _    = "" -- We don't know where the error is.
 highlight (line, col) text = "\n" ++ aux (line - 1) (col - 1) text ++ "\n"
 
 aux :: Int -> Int -> String -> String
