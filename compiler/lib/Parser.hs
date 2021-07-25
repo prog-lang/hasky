@@ -87,9 +87,11 @@ declaration = (<* token (TokenSemicolon def))
 
 sepBy
   :: Parser a
-  -> -- Parser for the separators
+  ->
+  -- Parser for the separators
      Parser b
-  -> -- Parser for elements
+  ->
+  -- Parser for elements
      Parser [b]
 sepBy sep element = (:) <$> element <*> many (sep *> element)
 
@@ -180,9 +182,20 @@ data Module = Module
   }
   deriving (Show, Eq)
 
+eofParser :: Parser ()
+eofParser = Parser $ \input -> if null input
+  then Right ((), [])
+  else Left $ Error
+    def
+    "I thought I'm done here. Are you sure you put things in the right order?"
+
 modParser :: Parser Module
 modParser =
-  Module <$> modDeclaration <*> many useDeclaration <*> many definition
+  Module
+    <$> modDeclaration
+    <*> many useDeclaration
+    <*> many definition
+    <*  eofParser
 
 -- ANALYZE
 
