@@ -173,6 +173,17 @@ definition = Parser $ \input -> case parse parser input of
   parser =
     declaration $ (defParser <|> pubDefParser) <*> nameParser <*> intParser
 
+data Module = Module
+  { modName :: Mod
+  , modUses :: [Use]
+  , modBody :: [Def]
+  }
+  deriving (Show, Eq)
+
+modParser :: Parser Module
+modParser =
+  Module <$> modDeclaration <*> many useDeclaration <*> many definition
+
 -- ANALYZE
 
 analyze :: Show a => Parser a -> String -> String

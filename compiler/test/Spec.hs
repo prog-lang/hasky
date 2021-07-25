@@ -1,5 +1,6 @@
 module Main where
 
+import           Debug.Trace                    ( trace )
 import           Lexer
 import           Parser
 import           Test.Tasty
@@ -8,8 +9,9 @@ import           Test.Tasty.HUnit
 -- MAIN
 
 main :: IO ()
-main = defaultMain
-  $ testGroup "Parser tests" [tcParseMod, tcParseUse, tcParseConstDefinition]
+main = defaultMain $ testGroup
+  "Parser tests"
+  [tcParseMod, tcParseUse, tcParseConstDefinition, tcParseModule]
 
 -- UTIL
 
@@ -120,3 +122,42 @@ tcParseConstDefinition = testGroup
      in  result @?= Def "magic" 42
     )
   ]
+
+tcParseModule :: TestTree
+tcParseModule = testGroup
+  "Parse first increment of a module"
+  [ testGroup
+    "Normal Tests"
+    [ testCase
+        "Name, 1 import and one def"
+        (let Right (result, _) = lexparse
+               Parser.modParser
+               "mod alex:vic; use core:io; def magic := 42;"
+         in  result @?= Parser.Module ["alex", "vic"]
+                                      [JustUse ["core", "io"]]
+                                      [Def "magic" 42]
+        )
+    ]
+  , testGroup
+    "Destructive Tests"
+    [ testCase
+      "Missing module declaration"
+      (let Left (Error pos err) =
+             lexparse Parser.modParser "use core:io; def magic := 42;"
+       in  null err @?= False
+      )
+    , testCase
+      "Use statement after Def"
+      (assertLeft $ lexparse Parser.modParser
+                             "mod alex:vic; def magic := 42; use core:io;"
+      )
+    ]
+  ]
+
+-- TODO: make aux func that reads a file with hasky program for tests
+assertLeft result = case result of
+  Left (Error pos err) -> null err @?= False
+  Right (result, _) ->
+    assertFailure $ "Expected error, but got output: " ++ show result
+
+-- TODO: case of that provides a more accurate error explanation instead of exhaustive patterns
