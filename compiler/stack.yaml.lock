@@ -10,4 +10,11 @@ snapshots:
     sha256: c632012da648385b9fa3c29f4e0afd56ead299f1c5528ee789058be410e883c0
     url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/0.yaml
     size: 585393
-packages: []
+packages:
+- original:
+    hackage: data-tree-print-0.1.0.2@sha256:d845e99f322df70e0c06d6743bf80336f5918d5423498528beb0593a2afc1703,1620
+  completed:
+    pantry-tree:
+      sha256: b8778eb1b16fddb91b2eed2b25f33a89d1e4f7a533160de4ccbf226f82456135
+      size: 272
+    hackage: data-tree-print-0.1.0.2@sha256:d845e99f322df70e0c06d6743bf80336f5918d5423498528beb0593a2afc1703,1620
