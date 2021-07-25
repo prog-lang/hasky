@@ -94,10 +94,8 @@ type Mod = ScopedName
 
 scopedName :: Parser ScopedName
 scopedName =
-  map convert
+  map unpackString
     <$> sepBy (token $ TokenColon def) (token $ TokenName def def)
-  where
-    convert (TokenName _ name) = name
 
 modDeclaration :: Parser Mod
 modDeclaration = Parser $ \input ->
@@ -119,23 +117,6 @@ data Use
   | UseAs ScopedName String -- use core:io as io;
   deriving (Show, Eq)
 
-justUse :: Parser Use
-justUse = JustUse <$> (token (TokenUse def) *> scopedName)
-
-useAs :: Parser Use
-useAs = Parser $ \input -> do
-  (scoped, input') <- parse scopedNameParser input
-  (rename, input'') <- parse renameParser input'
-  Right (UseAs scoped rename, input'')
-  where
-    scopedNameParser = token (TokenUse def) *> scopedName
-    renameParser =
-      renameConverter
-        <$> ( token (TokenAs def)
-                *> token (TokenName def def)
-            )
-    renameConverter (TokenName _ name) = name
-
 useDeclaration :: Parser Use
 useDeclaration = Parser $ \input ->
   case parse (declaration (useAs <|> justUse)) input of
@@ -150,6 +131,14 @@ useDeclaration = Parser $ \input ->
             ++ "\n    use core:io;"
             ++ "\n    use myfancymodule;\n"
     right -> right
+  where
+    usePath = token (TokenUse def) *> scopedName
+    justUse = JustUse <$> usePath
+    useAs =
+      UseAs <$> usePath
+        <*> ( unpackString
+                <$> (token (TokenAs def) *> token (TokenName def def))
+            )
 
 data Def
   = Def String Int
@@ -162,11 +151,13 @@ definition = Parser $ \input ->
     Left (Error pos err) ->
       Left $
         Error pos $
-          "On my way through parsing a def,\n" ++ err
-            ++ "\n>Make sure you used correct keywords!\n"
-            ++ "\n>Did you forget a semicolon?\n"
-            ++ "\nHere's an example of a correct use statements:\n"
-            ++ "\n    pub def magic := 42;\n"
+          "On my way through parsing a definition,\n" ++ err
+            ++ "\n> Make sure you used correct keywords!"
+            ++ "\n> Did you forget a semicolon?\n"
+            ++ "\nHere's an example of a valid definition:\n"
+            ++ "\n    def magic := 42;\n"
+            ++ "\nPublic definitions are available from other modules:\n"
+            ++ "\n    pub def shared := 666;\n"
     right -> right
   where
     defParser = Def <$ token (TokenDef def)
@@ -181,10 +172,8 @@ definition = Parser $ \input ->
 
 -- ANALYZE
 
-analyze :: String -> String
-analyze input =
+analyze :: Show a => Parser a -> String -> String
+analyze parser input =
   case parse parser $ tokenize input of
     Left (Error pos err) -> highlight pos input ++ err
     Right (parsed, _) -> show parsed
-  where
-    parser = modDeclaration
