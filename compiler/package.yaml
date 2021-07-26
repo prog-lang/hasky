@@ -53,4 +53,5 @@ tests:
       - directory
       - filepath
       - tasty
+      - data-default
       - tasty-hunit

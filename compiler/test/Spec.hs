@@ -1,5 +1,8 @@
 module Main where
 
+import           Control.Applicative
+import           Data.Default
+import           Data.List                      ( isPrefixOf )
 import           Debug.Trace                    ( trace )
 import           Lexer
 import           Parser
@@ -9,17 +12,41 @@ import           Test.Tasty.HUnit
 -- MAIN
 
 main :: IO ()
-main = defaultMain $ testGroup
-  "Parser tests"
-  [tcParseMod, tcParseUse, tcParseConstDefinition, tcParseModule]
+main = defaultMain
+  $ testGroup "Parser tests" [tcTokensParser, tcParserEitherCombinator]
+
+-- [tcParseMod, tcParseUse, tcParseConstDefinition, tcParseModule]
 
 -- UTIL
 
-lexparse :: Parser a -> String -> Either Error (a, [Token])
+lexparse :: Parser a -> String -> Consumed a
 lexparse parser = parse parser . tokenize
 
 -- TEST CASES
 
+tcTokensParser :: TestTree
+tcTokensParser =
+  testCase "The 'tokens' combinator"
+    $ let typedec =
+            tokens [TokenType def, TokenTypeName def def] <?> ("typedec" ++)
+          Consumed (Error (Message _ err)) =
+            parse typedec [TokenType def, TokenName def def]
+      in  isPrefixOf "typedec" err @?= True
+
+tcParserEitherCombinator :: TestTree
+tcParserEitherCombinator =
+  testCase "The (<|>) combinator"
+    $ let typedec =
+            tokens [TokenType def, TokenTypeName def def] <?> ("typedec" ++)
+          pubdef = tokens [TokenPub def, TokenDef def] <?> ("pubdef" ++)
+          either = typedec <|> pubdef
+          errMsg = case parse either [TokenType def, TokenName def def] of
+            (Consumed (Error (Message _ err))) -> err
+      in  -- (Empty (Error (Message _ err))) -> err
+          -- it's supposed to be Consumed (Error (Message _ "typedec ..."))
+          isPrefixOf "typedec" errMsg @?= True
+
+{-
 tcParseMod :: TestTree
 tcParseMod = testGroup
   "Parse 'mod' declaration"
@@ -153,11 +180,7 @@ tcParseModule = testGroup
       )
     ]
   ]
+-}
 
 -- TODO: make aux func that reads a file with hasky program for tests
-assertLeft result = case result of
-  Left (Error pos err) -> null err @?= False
-  Right (result, _) ->
-    assertFailure $ "Expected error, but got output: " ++ show result
-
 -- TODO: case of that provides a more accurate error explanation instead of exhaustive patterns
