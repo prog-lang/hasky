@@ -73,10 +73,13 @@ token tok = Parser aux
   aux [] =
     Left
       $  Error (0, 0)
-      $  "I was looking for '"
+      $  "If you see this error, it means that Viktor really messed up with\n"
+      ++ "the parser... Please open an issue at "
+      ++ "https://github.com/sharpvik/hasky/issues, citing the following:\n\n"
+      ++ "Expected token: "
       ++ show tok
-      ++ "', but instead you made me stare into the void...\n"
-      ++ "And now that void is staring right back at you!\n"
+      ++ "\nBut token stream was exhausted.\n\n"
+      ++ "PARSER ERROR #1\n"
 
 tokens :: [Token] -> Parser [Token]
 tokens = traverse token
@@ -86,13 +89,13 @@ declaration :: Parser a -> Parser a
 declaration = (<* token (TokenSemicolon def))
 
 sepBy
-  :: Parser a
-  ->
+  ::
   -- Parser for the separators
-     Parser b
+     Parser a
   ->
   -- Parser for elements
-     Parser [b]
+     Parser b
+  -> Parser [b]
 sepBy sep element = (:) <$> element <*> many (sep *> element)
 
 -- SUPREME PARSERS
@@ -173,7 +176,7 @@ definition = Parser $ \input -> case parse parser input of
     unpackString <$> token (TokenName def def) <* token (TokenAssign def)
   intParser = unpackInt <$> token (TokenInt def def)
   parser =
-    declaration $ (defParser <|> pubDefParser) <*> nameParser <*> intParser
+    declaration $ (pubDefParser <|> defParser) <*> nameParser <*> intParser
 
 data Module = Module
   { modName :: Mod
@@ -182,20 +185,10 @@ data Module = Module
   }
   deriving (Show, Eq)
 
-eofParser :: Parser ()
-eofParser = Parser $ \input -> if null input
-  then Right ((), [])
-  else Left $ Error
-    def
-    "I thought I'm done here. Are you sure you put things in the right order?"
-
 modParser :: Parser Module
 modParser =
-  Module
-    <$> modDeclaration
-    <*> many useDeclaration
-    <*> many definition
-    <*  eofParser
+  Module <$> modDeclaration <*> many useDeclaration <*> many definition <* token
+    (TokenEOF def)
 
 -- ANALYZE
 

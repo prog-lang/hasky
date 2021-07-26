@@ -91,6 +91,7 @@ data Token
     | TokenStr AlexPosn String
     | TokenInt AlexPosn Int
     | TokenOp AlexPosn String
+    | TokenEOF AlexPosn
 
 
 unpackString :: Token -> String
@@ -137,6 +138,7 @@ instance Show Token where
     show (TokenStr _ str) = "string"
     show (TokenInt _ int) = "integer"
     show (TokenOp _ op) = "operator"
+    show (TokenEOF _) = "end of file"
 
 
 instance Eq Token where
@@ -172,6 +174,7 @@ instance Eq Token where
     TokenStr _ _ == TokenStr _ _ = True
     TokenInt _ _ == TokenInt _ _ = True
     TokenOp _ _ == TokenOp _ _ = True
+    TokenEOF _ == TokenEOF _ = True
     _ == _ = False
 
 
@@ -180,7 +183,11 @@ instance Eq Token where
 
 
 tokenize :: String -> [Token]
-tokenize = alexScanTokens
+tokenize = addEOF . alexScanTokens where
+    addEOF [] = [TokenEOF $ AlexPn 0 0 0]
+    addEOF toks = 
+        let (index, line, column) = tokenAlexPosition (last toks)
+        in toks ++ [TokenEOF $ AlexPn (index + 1) line (column + 1)]
 
 
 
@@ -193,6 +200,10 @@ instance Default AlexPosn where
 
 position :: AlexPosn -> (Int, Int)
 position (AlexPn _ line column) = (line, column)
+
+
+alexPosition :: AlexPosn -> (Int, Int, Int)
+alexPosition (AlexPn index line column) = (index, line, column)
 
 
 tokenPosition :: Token -> (Int, Int)
@@ -228,6 +239,43 @@ tokenPosition (TokenChar pos _) = position pos
 tokenPosition (TokenStr pos _) = position pos
 tokenPosition (TokenInt pos _) = position pos
 tokenPosition (TokenOp pos _) = position pos
+tokenPosition (TokenEOF pos) = position pos
+
+
+tokenAlexPosition :: Token -> (Int, Int, Int)
+tokenAlexPosition (TokenLambda pos) = alexPosition pos
+tokenAlexPosition (TokenDot pos) = alexPosition pos
+tokenAlexPosition (TokenComma pos) = alexPosition pos
+tokenAlexPosition (TokenPipe pos) = alexPosition pos
+tokenAlexPosition (TokenColon pos) = alexPosition pos
+tokenAlexPosition (TokenSemicolon pos) = alexPosition pos
+tokenAlexPosition (TokenLeftParen pos) = alexPosition pos
+tokenAlexPosition (TokenRightParen pos) = alexPosition pos
+tokenAlexPosition (TokenLeftBrace pos) = alexPosition pos
+tokenAlexPosition (TokenRightBrace pos) = alexPosition pos
+tokenAlexPosition (TokenTypeSign pos) = alexPosition pos
+tokenAlexPosition (TokenAssign pos) = alexPosition pos
+tokenAlexPosition (TokenMod pos) = alexPosition pos
+tokenAlexPosition (TokenUse pos) = alexPosition pos
+tokenAlexPosition (TokenAs pos) = alexPosition pos
+tokenAlexPosition (TokenPub pos) = alexPosition pos
+tokenAlexPosition (TokenDef pos) = alexPosition pos
+tokenAlexPosition (TokenLet pos) = alexPosition pos
+tokenAlexPosition (TokenIn pos) = alexPosition pos
+tokenAlexPosition (TokenDo pos) = alexPosition pos
+tokenAlexPosition (TokenEnd pos) = alexPosition pos
+tokenAlexPosition (TokenWhen pos) = alexPosition pos
+tokenAlexPosition (TokenIs pos) = alexPosition pos
+tokenAlexPosition (TokenThen pos) = alexPosition pos
+tokenAlexPosition (TokenType pos) = alexPosition pos
+tokenAlexPosition (TokenAlias pos) = alexPosition pos
+tokenAlexPosition (TokenTypeName pos _) = alexPosition pos
+tokenAlexPosition (TokenName pos _) = alexPosition pos
+tokenAlexPosition (TokenChar pos _) = alexPosition pos
+tokenAlexPosition (TokenStr pos _) = alexPosition pos
+tokenAlexPosition (TokenInt pos _) = alexPosition pos
+tokenAlexPosition (TokenOp pos _) = alexPosition pos
+tokenAlexPosition (TokenEOF pos) = alexPosition pos
 
 
 showTokenPosition :: Token -> String
