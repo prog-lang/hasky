@@ -1,8 +1,10 @@
 {-# LANGUAGE FlexibleInstances #-}
 
+-- TODO: split this huge file into submodules.
 module Parser where
 
 import           Control.Applicative
+import           Control.Monad                  ( ap )
 import           Data.Default                   ( def )
 import           Highlight                      ( highlight )
 import           Lexer                          ( Token(..)
@@ -71,19 +73,7 @@ instance Functor Parser where
 
 instance Applicative Parser where
   pure value = Parser $ \input -> Empty $ Ok value input
-  (Parser p) <*> (Parser q) = Parser $ \input -> case p input of
-    Empty    (Error msg) -> Empty $ Error msg
-    Consumed (Error msg) -> Consumed $ Error msg
-    Empty    (Ok f rest) -> case q rest of
-      Empty    (Error msg ) -> Empty $ Error msg
-      Consumed (Error msg ) -> Consumed $ Error msg
-      Empty    (Ok x rest') -> Empty $ Ok (f x) rest'
-      Consumed (Ok x rest') -> Consumed $ Ok (f x) rest'
-    Consumed (Ok f rest) -> case q rest of
-      Empty    (Error msg ) -> Empty $ Error msg
-      Consumed (Error msg ) -> Consumed $ Error msg
-      Empty    (Ok x rest') -> Empty $ Ok (f x) rest'
-      Consumed (Ok x rest') -> Consumed $ Ok (f x) rest'
+  (<*>) = ap
 
 -- | Alternative implementation prevents infinite backtracking by checking
 --   whether Parser p consumes any input. If p consumed input but errored out,
@@ -102,7 +92,24 @@ instance Alternative Parser where
       consumed -> consumed
     consumed -> consumed
 
--- PRIMITIVE PARSERS
+-- PARSERS COMBINATORS
+
+try :: Parser a -> Parser a
+try (Parser p) = Parser $ \input -> case p input of
+  Consumed err@(Error _) -> Empty err
+  other                  -> other
+
+sepBy
+  ::
+  -- Parser for the separators
+     Parser a
+  ->
+  -- Parser for elements
+     Parser b
+  -> Parser [b]
+sepBy sep element = (:) <$> element <*> many (sep *> element)
+
+-- PARTIAL PARSERS
 
 token :: Token -> Parser Token
 token tok = Parser aux
@@ -131,22 +138,23 @@ token tok = Parser aux
       ++ "\nBut token stream was exhausted.\n\n"
       ++ "PARSER ERROR #1\n"
 
+eof :: Parser Token
+eof = token (TokenEOF def) <?> const
+  (  "I really didn't expect to see anything else here, and yet...\n\n"
+  ++ "> Usually this means that you put declarations in the wrong order.\n\n"
+  ++ "Hasky expects your module files to look like this:\n\n"
+  ++ "    mod myfancymodule; -- this must be the frist thing I see!\n\n"
+  ++ "    use core:io as io;\n"
+  ++ "    use myotherlib;    -- optional list of use statements\n\n"
+  ++ "    pub def mag := 42; -- then the list of definitions\n"
+  )
+
 tokens :: [Token] -> Parser [Token]
 tokens = traverse token
 
 -- | Match a list of tokens with a mandatory semicolon at the end of it.
 declaration :: Parser a -> Parser a
 declaration = (<* token (TokenSemicolon def))
-
-sepBy
-  ::
-  -- Parser for the separators
-     Parser a
-  ->
-  -- Parser for elements
-     Parser b
-  -> Parser [b]
-sepBy sep element = (:) <$> element <*> many (sep *> element)
 
 -- SUPREME PARSERS
 
@@ -176,7 +184,7 @@ data Use
   deriving (Show, Eq)
 
 useDeclaration :: Parser Use
-useDeclaration = declaration (useAs <|> justUse) <?> errorTransform
+useDeclaration = declaration (try useAs <|> justUse) <?> errorTransform
  where
   errorTransform err =
     "On my way through parsing your use statement,\n"
@@ -228,8 +236,7 @@ data Module = Module
 
 modParser :: Parser Module
 modParser =
-  Module <$> modDeclaration <*> many useDeclaration <*> many definition <* token
-    (TokenEOF def)
+  Module <$> modDeclaration <*> many useDeclaration <*> many definition <* eof
 
 -- ANALYZE
 

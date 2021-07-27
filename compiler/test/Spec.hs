@@ -12,10 +12,11 @@ import           Test.Tasty.HUnit
 -- MAIN
 
 main :: IO ()
-main = defaultMain
-  $ testGroup "Parser tests" [tcTokensParser, tcParserEitherCombinator]
+main =
+  defaultMain $ testGroup "Parser tests" [tcParserCombinators, tcParseModule]
 
--- [tcParseMod, tcParseUse, tcParseConstDefinition, tcParseModule]
+-- TODO: rewrite these for the new Parser type:
+--       [tcParseMod, tcParseUse, tcParseConstDefinition]
 
 -- UTIL
 
@@ -24,27 +25,48 @@ lexparse parser = parse parser . tokenize
 
 -- TEST CASES
 
-tcTokensParser :: TestTree
-tcTokensParser =
-  testCase "The 'tokens' combinator"
+tcParserCombinators :: TestTree
+tcParserCombinators = testGroup
+  "Parser Combinators"
+  [ testCase "The 'token' combinator (Ok)"
+    $ let parser               = token (TokenType def)
+          Consumed (Ok _ rest) = parse parser [TokenType def]
+      in  null rest @?= True
+  , testCase "The 'token' combinator (Error)"
+    $ let parser = token (TokenType def) <?> ("typetok" ++)
+          Empty (Error (Message _ err)) = parse parser [TokenTypeName def def]
+      in  isPrefixOf "typetok" err @?= True
+  , testCase "The (>>=) combinator"
+    $ let switch (TokenUse def) = token (TokenName def "")
+          kwpars = token (TokenUse def)
+          parser = kwpars >>= switch
+          Consumed (Ok (TokenName def name) []) =
+            parse parser [TokenUse def, TokenName def "name"]
+      in  name @?= "name"
+  , testCase "The (<|>) combinator (simple)"
+    $ let
+        user   = token (TokenUse def)
+        moder  = token (TokenMod def)
+        parser = user <|> moder
+        Empty (Error (Message pos err)) =
+          parse parser [TokenLet $ AlexPn 0 1 0]
+      in
+        pos @?= (1, 0)
+  , testCase "The 'tokens' combinator"
     $ let typedec =
             tokens [TokenType def, TokenTypeName def def] <?> ("typedec" ++)
           Consumed (Error (Message _ err)) =
             parse typedec [TokenType def, TokenName def def]
       in  isPrefixOf "typedec" err @?= True
-
-tcParserEitherCombinator :: TestTree
-tcParserEitherCombinator =
-  testCase "The (<|>) combinator"
+  , testCase "The (<|>) combinator"
     $ let typedec =
             tokens [TokenType def, TokenTypeName def def] <?> ("typedec" ++)
           pubdef = tokens [TokenPub def, TokenDef def] <?> ("pubdef" ++)
           either = typedec <|> pubdef
-          errMsg = case parse either [TokenType def, TokenName def def] of
-            (Consumed (Error (Message _ err))) -> err
-      in  -- (Empty (Error (Message _ err))) -> err
-          -- it's supposed to be Consumed (Error (Message _ "typedec ..."))
-          isPrefixOf "typedec" errMsg @?= True
+          Consumed (Error (Message _ err)) =
+            parse either [TokenType def, TokenName def def]
+      in  isPrefixOf "typedec" err @?= True
+  ]
 
 {-
 tcParseMod :: TestTree
@@ -149,6 +171,7 @@ tcParseConstDefinition = testGroup
      in  result @?= Def "magic" 42
     )
   ]
+-}
 
 tcParseModule :: TestTree
 tcParseModule = testGroup
@@ -156,8 +179,8 @@ tcParseModule = testGroup
   [ testGroup
     "Normal Tests"
     [ testCase
-        "Name, 1 import and one definition"
-        (let Right (result, _) = lexparse
+        "Normal: mod + use + def"
+        (let Consumed (Ok result []) = lexparse
                Parser.modParser
                "mod alex:vic; use core:io; def magic := 42;"
          in  result @?= Parser.Module ["alex", "vic"]
@@ -169,18 +192,20 @@ tcParseModule = testGroup
     "Destructive Tests"
     [ testCase
       "Missing module declaration"
-      (let Left (Error pos err) =
+      (let Empty (Error (Message _ err)) =
              lexparse Parser.modParser "use core:io; def magic := 42;"
        in  null err @?= False
       )
     , testCase
       "Use statement after definition"
-      (assertLeft $ lexparse Parser.modParser
-                             "mod alex:vic; def magic := 42; use core:io;"
+      (let Consumed (Error (Message _ err)) = lexparse
+             Parser.modParser
+             "mod alex:vic; def magic := 42; use core:io;"
+       in  null err @?= False
       )
     ]
   ]
--}
 
--- TODO: make aux func that reads a file with hasky program for tests
--- TODO: case of that provides a more accurate error explanation instead of exhaustive patterns
+-- TODO: make aux func that reads a file with hasky program for tests.
+-- TODO: case of that provides a more accurate error explanation instead of
+--       non-exhaustive patterns.
