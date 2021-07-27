@@ -28,44 +28,51 @@ lexparse parser = parse parser . tokenize
 tcParserCombinators :: TestTree
 tcParserCombinators = testGroup
   "Parser Combinators"
-  [ testCase "The 'token' combinator (Ok)"
-    $ let parser               = token (TokenType def)
-          Consumed (Ok _ rest) = parse parser [TokenType def]
-      in  null rest @?= True
-  , testCase "The 'token' combinator (Error)"
-    $ let parser = token (TokenType def) <?> ("typetok" ++)
-          Empty (Error (Message _ err)) = parse parser [TokenTypeName def def]
-      in  isPrefixOf "typetok" err @?= True
-  , testCase "The (>>=) combinator"
-    $ let switch (TokenUse def) = token (TokenName def "")
-          kwpars = token (TokenUse def)
-          parser = kwpars >>= switch
-          Consumed (Ok (TokenName def name) []) =
-            parse parser [TokenUse def, TokenName def "name"]
-      in  name @?= "name"
-  , testCase "The (<|>) combinator (simple)"
-    $ let
-        user   = token (TokenUse def)
-        moder  = token (TokenMod def)
-        parser = user <|> moder
-        Empty (Error (Message pos err)) =
-          parse parser [TokenLet $ AlexPn 0 1 0]
-      in
-        pos @?= (1, 0)
-  , testCase "The 'tokens' combinator"
-    $ let typedec =
-            tokens [TokenType def, TokenTypeName def def] <?> ("typedec" ++)
-          Consumed (Error (Message _ err)) =
-            parse typedec [TokenType def, TokenName def def]
-      in  isPrefixOf "typedec" err @?= True
-  , testCase "The (<|>) combinator"
-    $ let typedec =
-            tokens [TokenType def, TokenTypeName def def] <?> ("typedec" ++)
-          pubdef = tokens [TokenPub def, TokenDef def] <?> ("pubdef" ++)
-          either = typedec <|> pubdef
-          Consumed (Error (Message _ err)) =
-            parse either [TokenType def, TokenName def def]
-      in  isPrefixOf "typedec" err @?= True
+  [ testGroup
+    "Normal tests"
+    [ testCase "The 'token' combinator"
+      $ let parser               = token (TokenType def)
+            Consumed (Ok _ rest) = parse parser [TokenType def]
+        in  null rest @?= True
+    , testCase "The (>>=) combinator"
+      $ let switch (TokenUse def) = token (TokenName def "")
+            kwpars = token (TokenUse def)
+            parser = kwpars >>= switch
+            Consumed (Ok (TokenName def name) []) =
+              parse parser [TokenUse def, TokenName def "name"]
+        in  name @?= "name"
+    ]
+  , testGroup
+    "Destructive test"
+    [ testCase "The (<|>) combinator (simple)"
+      $ let
+          user   = token (TokenUse def)
+          moder  = token (TokenMod def)
+          parser = user <|> moder
+          Empty (Error (Message pos err)) =
+            parse parser [TokenLet $ AlexPn 0 1 0]
+        in
+          pos @?= (1, 0)
+    , testCase "The (<|>) combinator"
+      $ let typedec =
+              tokens [TokenType def, TokenTypeName def def] <?> ("typedec" ++)
+            pubdef = tokens [TokenPub def, TokenDef def] <?> ("pubdef" ++)
+            either = typedec <|> pubdef
+            Consumed (Error (Message _ err)) =
+              parse either [TokenType def, TokenName def def]
+        in  isPrefixOf "typedec" err @?= True
+    , testCase "The 'token' combinator"
+      $ let parser = token (TokenType def) <?> ("typetok" ++)
+            Empty (Error (Message _ err)) =
+              parse parser [TokenTypeName def def]
+        in  isPrefixOf "typetok" err @?= True
+    , testCase "The 'tokens' combinator"
+      $ let typedec =
+              tokens [TokenType def, TokenTypeName def def] <?> ("typedec" ++)
+            Consumed (Error (Message _ err)) =
+              parse typedec [TokenType def, TokenName def def]
+        in  isPrefixOf "typedec" err @?= True
+    ]
   ]
 
 {-
@@ -177,7 +184,7 @@ tcParseModule :: TestTree
 tcParseModule = testGroup
   "Parse first increment of a module"
   [ testGroup
-    "Normal Tests"
+    "Normal tests"
     [ testCase
         "Normal: mod + use + def"
         (let Consumed (Ok result []) = lexparse
@@ -189,7 +196,7 @@ tcParseModule = testGroup
         )
     ]
   , testGroup
-    "Destructive Tests"
+    "Destructive tests"
     [ testCase
       "Missing module declaration"
       (let Empty (Error (Message _ err)) =
