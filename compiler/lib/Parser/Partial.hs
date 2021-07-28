@@ -10,8 +10,6 @@ import           Parser.Combinators             ( sepBy
                                                 , try
                                                 )
 
--- PARTIAL PARSERS
-
 token :: Token -> Parser Token
 token tok = Parser aux
  where

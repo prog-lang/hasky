@@ -4,8 +4,6 @@ import           Control.Applicative
 import           Control.Monad                  ( ap )
 import           Lexer                          ( Token(..) )
 
--- PARSER TYPE
-
 data Message = Message (Int, Int) String
 
 data Reply a = Ok a [Token] | Error Message

@@ -21,16 +21,11 @@ import           Test.Tasty.HUnit
 -- MAIN
 
 main :: IO ()
-main =
-  defaultMain $ testGroup "Parser tests" [tcParserCombinators, tcParseModule]
+main = defaultMain $ testGroup
+  "Parser tests"
+  [tcParserCombinators, tcParseModule, tcParseMod, tcParseUse]
 
--- TODO: rewrite these for the new Parser type:
---       [tcParseMod, tcParseUse, tcParseConstDefinition]
-
--- UTIL
-
-lexparse :: Parser a -> String -> Consumed a
-lexparse parser = parse parser . tokenize
+-- TODO: make aux func that reads a file with hasky program for tests.
 
 -- TEST CASES
 
@@ -52,7 +47,7 @@ tcParserCombinators = testGroup
         in  name @?= "name"
     ]
   , testGroup
-    "Destructive test"
+    "Destructive tests"
     [ testCase "The (<|>) combinator (simple)"
       $ let
           user   = token (TokenUse def)
@@ -84,144 +79,146 @@ tcParserCombinators = testGroup
     ]
   ]
 
-{-
 tcParseMod :: TestTree
 tcParseMod = testGroup
   "Parse 'mod' declaration"
-  [ testCase
-    "EOF"
-    (let Left (Error pos err) =
-           lexparse Parser.modDeclaration "mod myfancymodule"
-     in  null err @?= False
-    )
-  , testCase
-    "Type instead of name"
-    (let Left (Error pos err) = lexparse Parser.modDeclaration "mod Core;"
-     in  null err @?= False
-    )
-  , testCase
-    "Name begins with a colon"
-    (let Left (Error pos err) = lexparse Parser.modDeclaration "mod :core:io;"
-     in  null err @?= False
-    )
-  , testCase
-    "Double-colon in the middle of the name"
-    (let Left (Error pos err) = lexparse Parser.modDeclaration "mod core::io;"
-     in  null err @?= False
-    )
-  , testCase
-    "Normal"
-    (let Right ([modname], _) = lexparse Parser.modDeclaration "mod core;"
-     in  modname @?= "core"
-    )
-  , testCase
-    "Normal but scoped"
-    (let Right (modname, _) = lexparse Parser.modDeclaration "mod core:io;"
-     in  modname @?= ["core", "io"]
-    )
+  -- TODO: quicktests on the weird characters used in module names?
+  [ testGroup
+    "Destructive Tests"
+    [ testCase "EOF" $ assertParseFail Parser.modDeclaration "mod myfancymodule"
+    , testCase "Type instead of name"
+      $ assertParseFail Parser.modDeclaration "mod Core;"
+    , testCase "Name begins with a colon"
+      $ assertParseFail Parser.modDeclaration "mod :core:io;"
+    , testCase "Double-colon in the middle of the name"
+      $ assertParseFail Parser.modDeclaration "mod core::io;"
+    ]
+  , testGroup
+    "Normal Tests"
+    [ testCase "Normal"
+      $ assertParseOk ignoreTheRest Parser.modDeclaration "mod core;" ["core"]
+    , testCase "Normal but scoped" $ assertParseOk ignoreTheRest
+                                                   Parser.modDeclaration
+                                                   "mod core:io;"
+                                                   ["core", "io"]
+    ]
   ]
 
 tcParseUse :: TestTree
 tcParseUse = testGroup
   "Parse 'use' statement"
-  [ testCase
-    "EOF"
-    (let Left (Error pos err) =
-           lexparse Parser.useDeclaration "use myfancymodule"
-     in  null err @?= False
-    )
-  , testCase
-    "Type instead of name"
-    (let Left (Error pos err) = lexparse Parser.useDeclaration "use Core;"
-     in  null err @?= False
-    )
-  , testCase
-    "Normal and plain"
-    (let Right (JustUse [modname], _) =
-           lexparse Parser.useDeclaration "use core;"
-     in  modname @?= "core"
-    )
-  , testCase
-    "Normal but scoped"
-    (let Right (JustUse scoped, _) =
-           lexparse Parser.useDeclaration "use core:io;"
-     in  scoped @?= ["core", "io"]
-    )
-  , testCase
-    "Normal but scoped and renamed"
-    (let Right (result, _) =
-           lexparse Parser.useDeclaration "use core:io as io;"
-     in  result @?= UseAs ["core", "io"] "io"
-    )
+  [ testGroup
+    "Destructive Tests"
+    [ testCase "EOF" $ assertParseFail Parser.useDeclaration "use myfancymodule"
+    , testCase "Type instead of name"
+      $ assertParseFail Parser.useDeclaration "use Core;"
+    ]
+  , testGroup
+    "Normal Tests"
+    [ testCase "Normal and plain" $ assertParseOk ignoreTheRest
+                                                  Parser.useDeclaration
+                                                  "use core;"
+                                                  (JustUse ["core"])
+    , testCase "Normal but scoped" $ assertParseOk ignoreTheRest
+                                                   Parser.useDeclaration
+                                                   "use core:io;"
+                                                   (JustUse ["core", "io"])
+    , testCase "Normal but scoped and renamed" $ assertParseOk
+      ignoreTheRest
+      Parser.useDeclaration
+      "use core:io as io;"
+      (UseAs ["core", "io"] "io")
+    ]
   ]
 
 tcParseConstDefinition :: TestTree
 tcParseConstDefinition = testGroup
   "Parse const definition"
-  [ testCase
-    "EOF"
-    (let Left (Error pos err) =
-           lexparse Parser.definition "pub def magic := 42"
-     in  null err @?= False
-    )
-  , testCase
-    "Type name in identifier"
-    (let Left (Error pos err) =
-           lexparse Parser.definition "pub def Magic := 42;"
-     in  null err @?= False
-    )
-  , testCase
-    "TokenEqual instead of TokenAssign"
-    (let Left (Error pos err) =
-           lexparse Parser.definition "pub def magic = 42;"
-     in  null err @?= False
-    )
-  , testCase
-    "Normal (Public Definition)"
-    (let Right (result, _) = lexparse Parser.definition "pub def magic := 42;"
-     in  result @?= PubDef "magic" 42
-    )
-  , testCase
-    "Normal (Private Definition)"
-    (let Right (result, _) = lexparse Parser.definition "def magic := 42;"
-     in  result @?= Def "magic" 42
-    )
+  [ testGroup
+    "Destructive Tests"
+    [ testCase "EOF" $ assertParseFail Parser.definition "pub def magic := 42"
+    , testCase "Type name in identifier"
+      $ assertParseFail Parser.definition "pub def Magic := 42;"
+    , testCase "Incorrect assert operator"
+      $ assertParseFail Parser.definition "pub def magic = 42;"
+    ]
+  , testGroup
+    "Normal Tests"
+    [ testCase "Normal (Public Definition)" $ assertParseOk
+      ignoreTheRest
+      Parser.definition
+      "pub def magic := 42"
+      (PubDef "magic" 42)
+    , testCase "Normal (Private Definition)" $ assertParseOk ignoreTheRest
+                                                             Parser.definition
+                                                             "def magic := 42"
+                                                             (Def "magic" 42)
+    ]
   ]
--}
 
 tcParseModule :: TestTree
 tcParseModule = testGroup
   "Parse first increment of a module"
   [ testGroup
     "Normal tests"
-    [ testCase
-        "Normal: mod + use + def"
-        (let Consumed (Ok result []) = lexparse
-               Parser.modParser
-               "mod alex:vic; use core:io; def magic := 42;"
-         in  result @?= Parser.Module ["alex", "vic"]
-                                      [JustUse ["core", "io"]]
-                                      [Def "magic" 42]
+    [ testCase "Normal: mod + use + def" $ assertParseOk
+        expectNoMore
+        Parser.modParser
+        "mod alex:vic; use core:io; def magic := 42;"
+        (Parser.Module ["alex", "vic"] [JustUse ["core", "io"]] [Def "magic" 42]
         )
     ]
   , testGroup
     "Destructive tests"
-    [ testCase
-      "Missing module declaration"
-      (let Empty (Error (Message _ err)) =
-             lexparse Parser.modParser "use core:io; def magic := 42;"
-       in  null err @?= False
-      )
-    , testCase
-      "Use statement after definition"
-      (let Consumed (Error (Message _ err)) = lexparse
-             Parser.modParser
-             "mod alex:vic; def magic := 42; use core:io;"
-       in  null err @?= False
-      )
+    [ testCase "Missing module declaration"
+      $ assertParseFail Parser.modParser "use core:io; def magic := 42;"
+    , testCase "Use statement after definition" $ assertParseFail
+      Parser.modParser
+      "mod alex:vic; def magic := 42; use core:io;"
     ]
   ]
 
--- TODO: make aux func that reads a file with hasky program for tests.
--- TODO: case of that provides a more accurate error explanation instead of
---       non-exhaustive patterns.
+-- UTIL
+
+lexparse :: Parser a -> String -> Consumed a
+lexparse parser = parse parser . tokenize
+
+assertParseFail :: (Show a) => Parser a -> String -> Assertion
+assertParseFail parser input = case lexparse parser input of
+  Empty    (Error _) -> True @?= True
+  Consumed (Error _) -> True @?= True
+  rest ->
+    assertFailure $ "Expected an error, but got: " ++ show rest ++ " instead."
+
+assertParseOk
+  :: (Show a, Eq a)
+  => ([Token] -> Assertion)
+  -> Parser a
+  -> String
+  -> a
+  -> Assertion
+assertParseOk restVal parser input expected = case lexparse parser input of
+  Consumed (Ok parsed rest) ->
+    if parsed == expected then restVal rest else parsed @?= expected
+  Consumed (Error e) ->
+    assertFailure
+      $  "Consumed the token succesfully, but got an error: "
+      ++ show e
+      ++ ", expected: "
+      ++ show expected
+  Empty (Error e) ->
+    assertFailure
+      $  "Nothing was consumed and an error shown: "
+      ++ show e
+      ++ ", while expected output:"
+      ++ show expected
+  Empty _ ->
+    assertFailure $ "Nothing was parsed, while expected: " ++ show expected
+
+expectNoMore :: [Token] -> Assertion
+expectNoMore tokens =
+  assertBool ("Expected no more tokens to parse, but got: " ++ show tokens)
+    $ null tokens
+
+ignoreTheRest :: [Token] -> Assertion
+ignoreTheRest _ = True @?= True
