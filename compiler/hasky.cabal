@@ -28,6 +28,9 @@ library
       Highlight
       Lexer
       Parser
+      Parser.Basics
+      Parser.Combinators
+      Parser.Partial
   other-modules:
       Paths_hasky
   hs-source-dirs:

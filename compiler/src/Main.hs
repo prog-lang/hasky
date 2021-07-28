@@ -32,4 +32,4 @@ fullVersion = name ++ " v" ++ showVersion version
 
 usage = printf "Usage: %s [%s]" name (intercalate " | " commands)
 
-commands = ["help", "version", "SOURCE.ha"]
+commands = ["help", "version", "compile SOURCE.ha"]

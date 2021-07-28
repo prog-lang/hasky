@@ -6,6 +6,15 @@ import           Data.List                      ( isPrefixOf )
 import           Debug.Trace                    ( trace )
 import           Lexer
 import           Parser
+import           Parser.Basics
+import           Parser.Combinators             ( sepBy
+                                                , try
+                                                )
+import           Parser.Partial                 ( declaration
+                                                , eof
+                                                , token
+                                                , tokens
+                                                )
 import           Test.Tasty
 import           Test.Tasty.HUnit
 
