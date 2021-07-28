@@ -1,13 +1,8 @@
 cradle:
   stack:
-    - path: "./lib"
-      component: "hasky:lib"
-
-    - path: "./src/Main.hs"
-      component: "hasky:exe:hasky"
-
-    - path: "./src/Paths_hasky.hs"
-      component: "hasky:exe:hasky"
-
-    - path: "./test"
-      component: "hasky:test:hasky-test"
+    - component: hasky:lib
+      path: ./lib
+    - component: hasky:exe:hasky
+      path: ./src/Main.hs
+    - component: hasky:test:hasky-test
+      path: ./test

@@ -6,13 +6,14 @@ cabal-version: 1.12
 
 name:           hasky
 version:        0.1.0
+synopsis:       Haskell-based functional programming language
 description:    Please see README.md on GitHub at <https://github.com/sharpvik/hasky#readme>
 category:       Functional Programming Languages
 homepage:       https://github.com/sharpvik/hasky#readme
 bug-reports:    https://github.com/sharpvik/hasky/issues
-author:         Viktor A. Rozenko Voitenko
+author:         Viktor A. Rozenko Voitenko, Aleksei Martirosov
 maintainer:     sharpvik@gmail.com
-copyright:      2021 Viktor A. Rozenko Voitenko
+copyright:      2021 Hasky Authors
 license:        MIT
 build-type:     Simple
 extra-source-files:

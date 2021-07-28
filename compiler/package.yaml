@@ -2,21 +2,17 @@ name: hasky
 version: 0.1.0
 github: "sharpvik/hasky"
 license: MIT
-author: "Viktor A. Rozenko Voitenko"
+author: "Viktor A. Rozenko Voitenko, Aleksei Martirosov"
 maintainer: "sharpvik@gmail.com"
-copyright: "2021 Viktor A. Rozenko Voitenko"
+copyright: "2021 Hasky Authors"
 
 extra-source-files:
   - README.md
   - ChangeLog.md
 
 # Metadata used when publishing your package
-# synopsis:            Short description of your package
+synopsis: Haskell-based functional programming language
 category: Functional Programming Languages
-
-# To avoid duplicated efforts in documentation and dealing with the
-# complications of embedding Haddock markup inside cabal files, it is
-# common to point users to the README.md file.
 description: Please see README.md on GitHub at <https://github.com/sharpvik/hasky#readme>
 
 dependencies:
