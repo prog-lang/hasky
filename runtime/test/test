@@ -1,7 +1,0 @@
-#!/usr/bin/bash
-
-test=$1 # test filename will become the entrypoint
-
-gcc $test ../lib/*.c &&            # exclude underscored files from build
-	((./a.out && echo 'PASS'); # execute and print PASS on success
-	rm a.out)                  # unconditional cleanup
