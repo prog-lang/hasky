@@ -1,10 +1,15 @@
-main:           # Task ()
-    std.show    # [ print ]
+# Startup
+    closure main
+    call
 
-    std.add     # [ print, (+) ]
-    apply 40    # [ print, (+ 40) ]
-    apply 2     # [ print, (+ 40 2) ]
-    call        # [ print, 42 ]
+main=               # Task ()
+    native show     # [ print ]
 
-    charge      # [ (print 42) ]
-    call        # [  ]
+    native add      # [ print, (+) ]
+    apply 40        # [ print, (+ 40) ]
+    apply 2         # [ print, (+ 40 2) ]
+    call            # [ print, 42 ]
+
+    charge          # [ (print 42) ]
+    call            # [  ]
+    return
