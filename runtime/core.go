@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-// Core is a list of Closure constructors for all native runtime operations.
+// Core is a list of Closure constructors for all native functions.
 var Core = []ClosureConstructor{
 	lazy(1, show),
 	lazy(2, add),

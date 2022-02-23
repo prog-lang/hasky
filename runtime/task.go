@@ -21,8 +21,8 @@ type Task struct {
 	env  *Environment
 }
 
-// NewMainTask returns a Task that expects no arguments - it represents the main
-// function (entrypoint) of the whole program with the following type: Task ().
+// NewMainTask returns a Task that expects no arguments - it represents the
+// entrypoint of the whole program with the following type: Task ().
 func NewMainTask(env *Environment) *Task {
 	return NewTask(0, 0, env)
 }
@@ -64,12 +64,14 @@ func (t *Task) step() (done bool) {
 	instruction := t.fetch()
 	log.Println("fetched instruction:", instruction)
 
-	command := t.decode(instruction)
+	execute, done := t.decode(instruction)
+	if done {
+		return
+	}
 	log.Print("decoded instruction")
 
-	done = t.execute(command, instruction)
+	execute(t)
 	log.Print("executed instruction")
-
 	return
 }
 
@@ -79,14 +81,9 @@ func (t *Task) fetch() (instruction Instruction) {
 	return
 }
 
-func (t *Task) decode(instruction Instruction) Command {
-	return Opcode[instruction.Opcode]
-}
-
-func (t *Task) execute(command Command, instruction Instruction) (done bool) {
+func (t *Task) decode(instruction Instruction) (action Action, done bool) {
 	if instruction.Opcode == bytecode.Return {
-		return true
+		return nil, true
 	}
-	command(t, instruction)
-	return
+	return Commands[instruction.Opcode](instruction.Operand), false
 }
