@@ -6,7 +6,7 @@ import (
 )
 
 type Instruction struct {
-	Opcode  uint8
+	Opcode  int
 	Operand int
 }
 

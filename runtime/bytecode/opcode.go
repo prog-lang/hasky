@@ -2,7 +2,7 @@ package bytecode
 
 const (
 	// Callables
-	Closure uint8 = iota
+	Closure int = iota
 	Task0
 	Task1
 	Task2
