@@ -4,14 +4,13 @@ import (
 	"fmt"
 )
 
-type fn func() *Closure
-
-var std = []fn{
+// Core is a list of Closure constructors for all native runtime operations.
+var Core = []ClosureConstructor{
 	lazy(1, show),
 	lazy(2, add),
 }
 
-func lazy(argc int, function Function) fn {
+func lazy(argc int, function Function) ClosureConstructor {
 	return func() *Closure {
 		return NewClosure(argc, function)
 	}

@@ -1,42 +1,53 @@
 package runtime
 
-var Opcode = []Mutator{
-	closure(0),
-	closure(1),
-	closure(2),
-	closure(3),
-	closure(4),
-	closure(5),
-	closure(6),
-	closure(7),
-	closure(8),
-	closure(9),
-	native,
+var Opcode = [16]Command{
+	closure,
+	task(0),
+	task(1),
+	task(2),
+	task(3),
+	task(4),
+	task(5),
+	task(6),
+	task(7),
+	task(8),
+	task(9),
 	apply,
 	charge,
 	call,
+
+	push,
+
+	pass, // return does nothing - it's a mere unwind flag
 }
 
-type Mutator func(*Machine, int)
+type Command func(*Task, Instruction)
 
-func closure(argc int) func(*Machine, int) {
-	return func(m *Machine, id int) {
-		// m.Push(NewClosure(argc, m.Code[id]))
+func closure(task *Task, instruction Instruction) {
+	task.Push(task.env.Core[instruction.Operand]())
+}
+
+func task(argc int) Command {
+	return func(task *Task, instruction Instruction) {
+		task.Push(NewTask(argc, instruction.Operand, task.env))
 	}
 }
 
-func native(m *Machine, id int) {
-	m.Push(m.std[id]())
+func apply(task *Task, instruction Instruction) {
+	task.Peek().(Callable).Apply(task.env.Data[instruction.Operand])
 }
 
-func apply(m *Machine, id int) {
-	m.Peek().(*Closure).Apply(m.Data[id])
+func charge(task *Task, instruction Instruction) {
+	arg := task.Pop()
+	task.Peek().(Callable).Apply(arg)
 }
 
-func charge(m *Machine, _ int) {
-	m.Peek().(*Closure).Apply(m.Pop())
+func call(task *Task, instruction Instruction) {
+	task.Push(task.Pop().(Callable).Call())
 }
 
-func call(m *Machine, _ int) {
-	m.Push(m.Pop().(*Closure).Call())
+func push(task *Task, instruction Instruction) {
+	task.Push(task.env.Data[instruction.Operand])
 }
+
+func pass(*Task, Instruction) {}

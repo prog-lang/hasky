@@ -2,6 +2,12 @@ package runtime
 
 type Function func([]Object) Object
 
+type ClosureConstructor func() *Closure
+
+// Closure is a wrapper that encapsulates functional environment for native
+// runtime operations (e.g. arithmetic operations).
+//
+// Closure implements Object, Callable.
 type Closure struct {
 	argc int
 	argi int
@@ -22,10 +28,9 @@ func (c *Closure) Type() Type {
 	return TypeClosure
 }
 
-func (c *Closure) Apply(arg Object) *Closure {
+func (c *Closure) Apply(arg Object) {
 	c.args[c.argi] = arg
 	c.argi++
-	return c
 }
 
 func (c *Closure) Call() Object {

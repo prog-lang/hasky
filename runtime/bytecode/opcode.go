@@ -1,19 +1,24 @@
 package bytecode
 
 const (
-	Closure0 uint8 = iota
-	Closure1
-	Closure2
-	Closure3
-	Closure4
-	Closure5
-	Closure6
-	Closure7
-	Closure8
-	Closure9
-	Return
-	Native
+	// Callables
+	Closure uint8 = iota
+	Task0
+	Task1
+	Task2
+	Task3
+	Task4
+	Task5
+	Task6
+	Task7
+	Task8
+	Task9
 	Apply
 	Charge
 	Call
+
+	// Stack
+	Push
+
+	Return
 )

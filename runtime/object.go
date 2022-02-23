@@ -11,3 +11,9 @@ const (
 type Object interface {
 	Type() Type
 }
+
+type Callable interface {
+	Object
+	Apply(Object)
+	Call() Object
+}
