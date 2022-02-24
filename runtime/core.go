@@ -18,7 +18,7 @@ func lazy(argc int, function Function) ClosureConstructor {
 
 func show(args []Object) Object {
 	fmt.Println(args[0])
-	return Unit{}
+	return Nil
 }
 
 func add(args []Object) Object {

@@ -11,3 +11,5 @@ type Unit struct{}
 func (Unit) Type() Type {
 	return TypeUnit
 }
+
+var Nil = Unit{}

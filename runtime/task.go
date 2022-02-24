@@ -24,7 +24,9 @@ type Task struct {
 // NewMainTask returns a Task that expects no arguments - it represents the
 // entrypoint of the whole program with the following type: Task ().
 func NewMainTask(env *Environment) *Task {
-	return NewTask(0, 0, env)
+	const entrypointInstructionAddress = 0
+	const mainArgumentCount = 0
+	return NewTask(mainArgumentCount, entrypointInstructionAddress, env)
 }
 
 func NewTask(argc, addr int, env *Environment) *Task {

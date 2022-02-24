@@ -21,7 +21,7 @@ func (s *Stack) Pop() (o Object) {
 
 func (s *Stack) SafePop() (o Object) {
 	if s.Empty() {
-		return Unit{}
+		return Nil
 	}
 	return s.Pop()
 }
