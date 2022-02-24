@@ -26,10 +26,14 @@ mode _ = usage
 
 -- INFO
 
+name :: String
 name = "hasky"
 
+fullVersion :: String
 fullVersion = name ++ " v" ++ showVersion version
 
-usage = printf "Usage: %s [%s]" name (intercalate " | " commands)
+usage :: IO ()
+usage = printf "Usage: %s [%s]\n" name (intercalate " | " commands)
 
+commands :: [String]
 commands = ["help", "version", "compile SOURCE.ha"]
