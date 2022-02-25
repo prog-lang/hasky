@@ -6,7 +6,7 @@ import (
 
 // Core is a list of Closure constructors for all native functions.
 var Core = []ClosureConstructor{
-	lazy(1, show),
+	lazy(1, printout),
 	lazy(2, add),
 }
 
@@ -16,7 +16,7 @@ func lazy(argc int, function Function) ClosureConstructor {
 	}
 }
 
-func show(args []Object) Object {
+func printout(args []Object) Object {
 	fmt.Println(args[0])
 	return Nil
 }
