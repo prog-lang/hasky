@@ -1,6 +1,6 @@
-name: hasky
+name: hasky-compile
 version: 0.1.0
-github: "sharpvik/hasky"
+github: "sharpvik/hasky/compiler"
 license: MIT
 author: "Viktor A. Rozenko Voitenko, Aleksei Martirosov"
 maintainer: "sharpvik@gmail.com"
@@ -24,9 +24,11 @@ library:
   dependencies:
     - array
     - data-default
+    - bytestring
+    - list-singleton
 
 executables:
-  hasky:
+  hasky-compile:
     main: Main.hs
     source-dirs: src
     ghc-options:
@@ -34,7 +36,7 @@ executables:
       - -rtsopts
       - -with-rtsopts=-N
     dependencies:
-      - hasky
+      - hasky-compile
 
 tests:
   hasky-test:
@@ -45,7 +47,7 @@ tests:
       - -rtsopts
       - -with-rtsopts=-N
     dependencies:
-      - hasky
+      - hasky-compile
       - directory
       - filepath
       - tasty

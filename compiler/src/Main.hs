@@ -4,9 +4,9 @@ module Main where
 
 import           Data.List                      ( intercalate )
 import           Data.Version                   ( showVersion )
-import qualified Lexer
 import qualified Parser
-import           Paths_hasky                    ( version )
+import           Paths_hasky_compile            ( version )
+import qualified Pipeline
 import           System.Environment             ( getArgs )
 import           Text.Printf                    ( printf )
 
@@ -20,9 +20,9 @@ main = getArgs >>= mode
 mode :: [String] -> IO ()
 mode ["help"   ] = usage
 mode ["version"] = putStrLn fullVersion
-mode ["compile", file] =
-  readFile file >>= (putStrLn . Parser.analyze Parser.modParser)
-mode _ = usage
+mode [file     ] = Pipeline.file file
+mode []          = Pipeline.standard
+mode _           = usage
 
 -- INFO
 
@@ -33,7 +33,7 @@ fullVersion :: String
 fullVersion = name ++ " v" ++ showVersion version
 
 usage :: IO ()
-usage = printf "Usage: %s [%s]\n" name (intercalate " | " commands)
+usage = printf "Usage: %s [ %s ]\n" name (intercalate " | " commands)
 
 commands :: [String]
-commands = ["help", "version", "compile SOURCE.ha"]
+commands = ["help", "version", "SOURCE.ha"]

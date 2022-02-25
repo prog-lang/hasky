@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 
-name:           hasky
+name:           hasky-compile
 version:        0.1.0
 synopsis:       Haskell-based functional programming language
 description:    Please see README.md on GitHub at <https://github.com/sharpvik/hasky#readme>
@@ -23,42 +23,48 @@ extra-source-files:
 source-repository head
   type: git
   location: https://github.com/sharpvik/hasky
+  subdir: compiler
 
 library
   exposed-modules:
+      Assembly
       Highlight
       Lexer
+      Opcode
       Parser
       Parser.Basics
       Parser.Combinators
       Parser.Partial
+      Pipeline
   other-modules:
-      Paths_hasky
+      Paths_hasky_compile
   hs-source-dirs:
       lib
   build-depends:
       array
     , base >=4.7 && <5
+    , bytestring
     , data-default
+    , list-singleton
   default-language: Haskell2010
 
-executable hasky
+executable hasky-compile
   main-is: Main.hs
   other-modules:
-      Paths_hasky
+      Paths_hasky_compile
   hs-source-dirs:
       src
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
-    , hasky
+    , hasky-compile
   default-language: Haskell2010
 
 test-suite hasky-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Paths_hasky
+      Paths_hasky_compile
   hs-source-dirs:
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
@@ -67,7 +73,7 @@ test-suite hasky-test
     , data-default
     , directory
     , filepath
-    , hasky
+    , hasky-compile
     , tasty
     , tasty-hunit
   default-language: Haskell2010

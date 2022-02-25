@@ -37,6 +37,10 @@ data Def
   | PubDef String Int
   deriving (Show, Eq)
 
+defName :: Def -> String
+defName (Def    name _) = name
+defName (PubDef name _) = name
+
 data Module = Module
   { modName :: Mod
   , modUses :: [Use]
@@ -107,10 +111,10 @@ modParser =
 
 -- ANALYZE
 
-analyze :: Show a => Parser a -> String -> String
+analyze :: Show a => Parser a -> String -> Either String a
 analyze parser input = case parse parser $ tokenize input of
   Consumed reply -> interpret reply
   Empty    reply -> interpret reply
  where
-  interpret (Error (Message pos err)) = highlight pos input ++ err
-  interpret (Ok parsed _            ) = show parsed
+  interpret (Error (Message pos err)) = Left $ highlight pos input ++ err
+  interpret (Ok parsed _            ) = Right parsed
