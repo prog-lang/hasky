@@ -3,7 +3,7 @@ package runtime
 import (
 	"log"
 
-	"github.com/sharpvik/hasky/runtime/bytecode"
+	"github.com/sharpvik/hasky/runtime/opcode"
 )
 
 // Task represents a closure that encapsulates its environment and arguments for
@@ -84,7 +84,7 @@ func (t *Task) fetch() (instruction Instruction) {
 }
 
 func (t *Task) decode(instruction Instruction) (action Action, done bool) {
-	if instruction.Opcode == bytecode.Return {
+	if instruction.Opcode == opcode.Return {
 		return nil, true
 	}
 	return Commands[instruction.Opcode](instruction.Operand), false

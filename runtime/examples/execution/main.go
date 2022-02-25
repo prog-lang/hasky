@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/sharpvik/hasky/runtime"
-	"github.com/sharpvik/hasky/runtime/bytecode"
+	"github.com/sharpvik/hasky/runtime/opcode"
 )
 
 func init() {
@@ -19,14 +19,14 @@ func main() {
 	}
 
 	code := []runtime.Instruction{
-		{bytecode.Closure, 0},
-		{bytecode.Closure, 1},
-		{bytecode.Apply, 0},
-		{bytecode.Apply, 1},
-		{bytecode.Call, 0},
-		{bytecode.Charge, 0},
-		{bytecode.Call, 0},
-		{bytecode.Return, 0},
+		{opcode.Closure, 0},
+		{opcode.Closure, 1},
+		{opcode.Apply, 0},
+		{opcode.Apply, 1},
+		{opcode.Call, 0},
+		{opcode.Charge, 0},
+		{opcode.Call, 0},
+		{opcode.Return, 0},
 	}
 
 	runtime.Start(runtime.NewEnvironment(data, code))
