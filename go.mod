@@ -1,4 +1,4 @@
-module github.com/sharpvik/hasky/runtime
+module github.com/sharpvik/hasky
 
 go 1.17
 
