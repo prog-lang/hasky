@@ -16,7 +16,31 @@ var (
 	ErrBadInstructionParse = errors.New("bad isntruction parse")
 )
 
-func parseLine(line string) (parsed interface{}, err error) {
+type ErrorMap []ErrorLine
+
+type ErrorLine struct {
+	Number int
+	Error  error
+}
+
+func parseLines(input string) (parsedLines []*ParsedLine, errs ErrorMap) {
+	lines := strings.Split(input, "\n")
+	parsedLines = make([]*ParsedLine, 0, len(lines))
+	errs = make(ErrorMap, 0, len(lines))
+
+	for i, line := range lines {
+		parsed, err := parseLine(line)
+		if err != nil {
+			errs = append(errs, ErrorLine{i, err})
+		} else if parsed != nil {
+			parsedLines = append(parsedLines, parsed)
+		}
+	}
+
+	return
+}
+
+func parseLine(line string) (parsed *ParsedLine, err error) {
 	trimmedLine := strings.TrimSpace(line)
 	if len(trimmedLine) == 0 {
 		return nil, nil
@@ -24,12 +48,15 @@ func parseLine(line string) (parsed interface{}, err error) {
 
 	label, err := parseLabel(trimmedLine)
 	if err == nil {
-		return label, err
+		return NewLabel(label), err
 	}
 
 	opcode, operand, err := parseInstruction(line)
 	if err == nil {
-		return runtime.Instruction{opcode, operand}, err
+		return NewInstruction(runtime.Instruction{
+			Opcode:  opcode,
+			Operand: operand,
+		}), err
 	}
 
 	return nil, ErrBadLineParse

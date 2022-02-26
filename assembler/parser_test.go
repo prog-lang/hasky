@@ -9,6 +9,19 @@ import (
 	op "github.com/sharpvik/hasky/runtime/opcode"
 )
 
+func TestParseLines(t *testing.T) {
+	const asm = `
+	main:main=
+		closure 0
+		push 1
+		charge 0
+		call 0
+		return 0
+	`
+	_, errs := parseLines(asm)
+	assert.Len(t, errs, 0)
+}
+
 func TestParseLabel(t *testing.T) {
 	label, err := parseLabel("main=")
 	assert.NoError(t, err)
@@ -42,9 +55,11 @@ func TestParseLine(t *testing.T) {
 
 	label, err := parseLine("core:io=")
 	assert.NoError(t, err)
-	assert.Equal(t, "core:io", label.(string))
+	assert.Equal(t, "core:io", label.Value.(string))
 
 	instruction, err := parseLine("  closure 1")
 	assert.NoError(t, err)
-	assert.Equal(t, runtime.Instruction{op.Closure, 1}, instruction)
+	assert.Equal(t,
+		runtime.Instruction{op.Closure, 1},
+		instruction.Value.(runtime.Instruction))
 }
