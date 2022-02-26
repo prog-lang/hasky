@@ -6,20 +6,27 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/sharpvik/hasky/runtime"
+	"github.com/sharpvik/hasky/runtime/opcode"
 	op "github.com/sharpvik/hasky/runtime/opcode"
 )
 
 func TestParseLines(t *testing.T) {
 	const asm = `
 	main:main=
+
 		closure 0
 		push 1
 		charge 0
 		call 0
 		return 0
 	`
-	_, errs := parseLines(asm)
+	ast, errs := parse(asm)
 	assert.Len(t, errs, 0)
+	assert.Len(t, ast, 6)
+	label := ast[0]
+	closure := ast[1]
+	assert.Equal(t, NewLabel("main:main"), label)
+	assert.Equal(t, NewInstruction(opcode.Closure, 0), closure)
 }
 
 func TestParseLabel(t *testing.T) {

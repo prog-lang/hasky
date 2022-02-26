@@ -9,6 +9,8 @@ const (
 	TypeInstruction
 )
 
+type AST []*ParsedLine
+
 type ParsedLine struct {
 	Tag   int
 	Value interface{}
@@ -25,6 +27,6 @@ func NewLabel(label string) *ParsedLine {
 	return NewParsedLine(TypeLabel, label)
 }
 
-func NewInstruction(i runtime.Instruction) *ParsedLine {
-	return NewParsedLine(TypeInstruction, i)
+func NewInstruction(opcode int, operand int) *ParsedLine {
+	return NewParsedLine(TypeInstruction, runtime.Instruction{opcode, operand})
 }

@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/sharpvik/hasky/runtime"
 	op "github.com/sharpvik/hasky/runtime/opcode"
 )
 
@@ -23,9 +22,9 @@ type ErrorLine struct {
 	Error  error
 }
 
-func parseLines(input string) (parsedLines []*ParsedLine, errs ErrorMap) {
+func parse(input string) (ast AST, errs ErrorMap) {
 	lines := strings.Split(input, "\n")
-	parsedLines = make([]*ParsedLine, 0, len(lines))
+	ast = make([]*ParsedLine, 0, len(lines))
 	errs = make(ErrorMap, 0, len(lines))
 
 	for i, line := range lines {
@@ -33,7 +32,7 @@ func parseLines(input string) (parsedLines []*ParsedLine, errs ErrorMap) {
 		if err != nil {
 			errs = append(errs, ErrorLine{i, err})
 		} else if parsed != nil {
-			parsedLines = append(parsedLines, parsed)
+			ast = append(ast, parsed)
 		}
 	}
 
@@ -53,10 +52,7 @@ func parseLine(line string) (parsed *ParsedLine, err error) {
 
 	opcode, operand, err := parseInstruction(line)
 	if err == nil {
-		return NewInstruction(runtime.Instruction{
-			Opcode:  opcode,
-			Operand: operand,
-		}), err
+		return NewInstruction(opcode, operand), err
 	}
 
 	return nil, ErrBadLineParse
