@@ -3,7 +3,6 @@ package assembler
 import (
 	"errors"
 	"regexp"
-	"strconv"
 	"strings"
 
 	op "github.com/sharpvik/hasky/runtime/opcode"
@@ -67,24 +66,35 @@ func parseLabel(line string) (label string, err error) {
 	return matches[1], nil
 }
 
-func parseInstruction(line string) (opcode int, operand int, err error) {
+func parseInstruction(line string) (opcode int, operand string, err error) {
 	fields := strings.Fields(line)
-	if len(fields) != 2 {
+	switch len(fields) {
+	case 1:
+		return justOpcode(fields)
+
+	case 2:
+		return opcodeAndOperand(fields)
+
+	default:
 		err = ErrBadInstructionParse
 		return
 	}
+}
 
-	opcodeString, operandString := fields[0], fields[1]
-
+func justOpcode(fields []string) (opcode int, operand string, err error) {
+	opcodeString := fields[0]
 	opcode, validOpcode := op.FromString(opcodeString)
 	if !validOpcode {
 		err = ErrBadInstructionParse
+	}
+	return
+}
+
+func opcodeAndOperand(fields []string) (opcode int, operand string, err error) {
+	opcode, operand, err = justOpcode(fields)
+	if err != nil {
 		return
 	}
-
-	operand, err = strconv.Atoi(operandString)
-	if err != nil {
-		err = ErrBadInstructionParse
-	}
+	operand = fields[1]
 	return
 }

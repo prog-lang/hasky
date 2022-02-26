@@ -5,8 +5,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/sharpvik/hasky/runtime"
-	"github.com/sharpvik/hasky/runtime/opcode"
 	op "github.com/sharpvik/hasky/runtime/opcode"
 )
 
@@ -14,11 +12,11 @@ func TestParseLines(t *testing.T) {
 	const asm = `
 	main:main=
 
-		closure 0
+		closure core:print
 		push 1
-		charge 0
-		call 0
-		return 0
+		charge
+		call
+		return
 	`
 	ast, errs := parse(asm)
 	assert.Len(t, errs, 0)
@@ -26,7 +24,7 @@ func TestParseLines(t *testing.T) {
 	label := ast[0]
 	closure := ast[1]
 	assert.Equal(t, NewLabel("main:main"), label)
-	assert.Equal(t, NewInstruction(opcode.Closure, 0), closure)
+	assert.Equal(t, NewInstruction(op.Closure, "core:print"), closure)
 }
 
 func TestParseLabel(t *testing.T) {
@@ -40,15 +38,12 @@ func TestParseLabel(t *testing.T) {
 }
 
 func TestParseInstruction(t *testing.T) {
-	opcode, operand, err := parseInstruction("closure 0")
+	opcode, operand, err := parseInstruction("closure core:print")
 	assert.NoError(t, err)
 	assert.Equal(t, op.Closure, opcode)
-	assert.Equal(t, 0, operand)
+	assert.Equal(t, "core:print", operand)
 
 	_, _, err = parseInstruction("task10 0")
-	assert.ErrorIs(t, err, ErrBadInstructionParse)
-
-	_, _, err = parseInstruction("task9 hello")
 	assert.ErrorIs(t, err, ErrBadInstructionParse)
 
 	_, _, err = parseInstruction("closure hello bye")
@@ -64,9 +59,9 @@ func TestParseLine(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "core:io", label.Value.(string))
 
-	instruction, err := parseLine("  closure 1")
+	instruction, err := parseLine("  closure core:print")
 	assert.NoError(t, err)
 	assert.Equal(t,
-		runtime.Instruction{op.Closure, 1},
-		instruction.Value.(runtime.Instruction))
+		Instruction{op.Closure, "core:print"},
+		instruction.Value.(Instruction))
 }

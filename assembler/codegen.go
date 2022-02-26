@@ -5,14 +5,14 @@ import (
 )
 
 type Bytecode struct {
-	// Labels map[string]int
+	Data []runtime.Object
 	Code []runtime.Instruction
 }
 
-func generateBytecode(parsed AST) (code []byte) {
+func BytecodeFromAST(parsed AST) (bc Bytecode) {
 	return
 }
 
-func process(parsed AST) (bc Bytecode) {
+func (ast AST) bytes() (code []byte) {
 	return
 }

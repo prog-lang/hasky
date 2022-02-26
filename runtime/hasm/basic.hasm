@@ -1,6 +1,7 @@
 # Startup
     closure main
     call
+    return
 
 main=               # Task ()
     native show     # [ print ]
