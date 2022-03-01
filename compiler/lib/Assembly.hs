@@ -12,14 +12,19 @@ import           Parser                         ( Def(Def, PubDef)
 
 -- EXPORTED
 
-newtype Instruction = Instruction (Opcode, Int)
+data Operand = Name String | Int Int
 
-cmd :: Opcode -> Int -> Instruction
-cmd opcode operand = Instruction (opcode, operand)
+instance Show Operand where
+  show (Name name) = name
+  show (Int  int ) = show int
+
+newtype Instruction = Instruction (Opcode, Maybe Operand)
 
 instance Show Instruction where
   show (Instruction (opcode, operand)) =
-    padding ++ show opcode ++ " " ++ show operand ++ "\n"
+    padding ++ show opcode ++ case operand of
+      Just value -> " " ++ show value ++ "\n"
+      Nothing    -> "\n"
    where
     padding = replicate offset ' '
     offset  = 2
@@ -29,9 +34,22 @@ newtype Assembly = Assembly [Instruction]
 instance Show Assembly where
   show (Assembly instructions) = concatMap show instructions
 
+justOpcode :: Opcode -> Instruction
+justOpcode opcode = Instruction (opcode, Nothing)
+
+withName :: Opcode -> String -> Instruction
+withName opcode name = Instruction (opcode, Just $ Name name)
+
+withInt :: Opcode -> Int -> Instruction
+withInt opcode int = Instruction (opcode, Just $ Int int)
+
 generate :: Module -> Assembly
 generate mod = Assembly
-  [cmd Closure 0, cmd Apply int, cmd Call 0, cmd Return 0]
+  [ withName Closure "io:print"
+  , withInt Apply int
+  , justOpcode Call
+  , justOpcode Return
+  ]
  where
   entrypoint = head . filter isMain . Parser.modBody
   isMain     = (== "main") . Parser.defName

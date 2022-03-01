@@ -97,13 +97,12 @@ definition = parser <?> errorTransform
       ++ "\n    def magic := 42;\n"
       ++ "\nPublic definitions are available from other modules:\n"
       ++ "\n    pub def shared := 666;\n"
-  defParser    = Def <$ token (TokenDef def)
-  pubDefParser = PubDef <$ tokens [TokenPub def, TokenDef def]
+  pubDefParser = PubDef <$ token (TokenPub def)
   nameParser =
     unpackString <$> token (TokenName def def) <* token (TokenAssign def)
   intParser = unpackInt <$> token (TokenInt def def)
   parser =
-    declaration $ (pubDefParser <|> defParser) <*> nameParser <*> intParser
+    declaration $ (pubDefParser <|> pure Def) <*> nameParser <*> intParser
 
 modParser :: Parser Module
 modParser =
