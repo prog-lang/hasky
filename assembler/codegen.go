@@ -6,19 +6,19 @@ import (
 
 type Bytecode struct {
 	Labels map[string]int
-	Data   []runtime.Object
+	Data   []runtime.Constant
 	Code   []runtime.Instruction
 }
 
 func NewBytecode() *Bytecode {
 	return &Bytecode{
 		Labels: make(map[string]int),
-		Data:   make([]runtime.Object, 0),
+		Data:   make([]runtime.Constant, 0),
 		Code:   make([]runtime.Instruction, 0),
 	}
 }
 
-func BytecodeFromAST(ast AST) (bc *Bytecode, err error) {
+func (ast AST) Bytecode() (bc *Bytecode, err error) {
 	bc = NewBytecode()
 	bc.identifyLabels(ast)
 	err = bc.generateCodeAndData(ast)
