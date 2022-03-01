@@ -12,7 +12,7 @@ func TestParseLines(t *testing.T) {
 	const asm = `
 	main:main=
 
-		closure core:print
+		closure io:print
 		push 1
 		charge
 		call
@@ -24,7 +24,7 @@ func TestParseLines(t *testing.T) {
 	label := ast[0]
 	closure := ast[1]
 	assert.Equal(t, NewLabel("main:main"), label)
-	assert.Equal(t, NewInstruction(op.Closure, "core:print"), closure)
+	assert.Equal(t, NewInstruction(op.Closure, "io:print"), closure)
 }
 
 func TestParseLabel(t *testing.T) {

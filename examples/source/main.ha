@@ -1,5 +1,5 @@
 mod main;
 
-use core:io as io;
+use io;
 
 main := 42;
