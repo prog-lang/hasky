@@ -25,45 +25,45 @@ var Commands = [15]Command{
 
 // Command is a functional representation of an opcode. Supply an operand to it
 // and you'll get an Action.
-type Command func(operand int) Action
+type Command func(operand int32) Action
 
 // Action is an effectful instruction that operates on a Task frame.
 type Action func(*Task)
 
-func closure(operand int) Action {
+func closure(operand int32) Action {
 	return func(task *Task) {
 		task.Push(task.env.Core[operand]())
 	}
 }
 
 func task(argc int) Command {
-	return func(operand int) Action {
+	return func(operand int32) Action {
 		return func(task *Task) {
 			task.Push(NewTask(argc, operand, task.env))
 		}
 	}
 }
 
-func apply(operand int) Action {
+func apply(operand int32) Action {
 	return func(task *Task) {
 		task.Peek().(Callable).Apply(task.env.Data[operand])
 	}
 }
 
-func charge(operand int) Action {
+func charge(operand int32) Action {
 	return func(task *Task) {
 		arg := task.Pop()
 		task.Peek().(Callable).Apply(arg)
 	}
 }
 
-func call(operand int) Action {
+func call(operand int32) Action {
 	return func(task *Task) {
 		task.Push(task.Pop().(Callable).Call())
 	}
 }
 
-func push(operand int) Action {
+func push(operand int32) Action {
 	return func(task *Task) {
 		task.Push(task.env.Data[operand])
 	}

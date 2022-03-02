@@ -6,7 +6,7 @@ import (
 
 const (
 	/* Callables */
-	Closure int = iota
+	Closure int32 = iota
 	Task0
 	Task1
 	Task2
@@ -27,7 +27,7 @@ const (
 	Return
 )
 
-var opcodes = map[string]int{
+var opcodes = map[string]int32{
 	"closure": Closure,
 	"task0":   Task0,
 	"task1":   Task1,
@@ -46,12 +46,12 @@ var opcodes = map[string]int{
 	"return":  Return,
 }
 
-func FromString(s string) (opcode int, exists bool) {
+func FromString(s string) (opcode int32, exists bool) {
 	opcode, exists = opcodes[s]
 	return
 }
 
-func MustFromString(s string) (opcode int) {
+func MustFromString(s string) (opcode int32) {
 	if opcode, exists := FromString(s); exists {
 		return opcode
 	}

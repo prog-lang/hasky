@@ -2,24 +2,23 @@ package runtime
 
 import (
 	"bytes"
-	"encoding/binary"
 
-	endian "github.com/yalue/native_endian"
+	"github.com/sharpvik/hasky/runtime/convert"
 )
 
 type Instruction struct {
-	Opcode  int
-	Operand int
+	Opcode  int32
+	Operand int32
 }
 
 type Code []Instruction
 
 func (instruction Instruction) EncodeAndWrite(buf *bytes.Buffer) (err error) {
-	err = binary.Write(buf, endian.NativeEndian(), int32(instruction.Opcode))
+	_, err = buf.Write(convert.Int32AsBytes(instruction.Opcode))
 	if err != nil {
 		return
 	}
-	err = binary.Write(buf, endian.NativeEndian(), int32(instruction.Operand))
+	_, err = buf.Write(convert.Int32AsBytes(instruction.Operand))
 	if err != nil {
 		return
 	}

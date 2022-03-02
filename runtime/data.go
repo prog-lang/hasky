@@ -5,8 +5,8 @@ import (
 	"bytes"
 	"errors"
 	"io"
-	"strconv"
-	"strings"
+
+	"github.com/sharpvik/hasky/runtime/convert"
 )
 
 type Data []Constant
@@ -19,49 +19,45 @@ func (data Data) EncodeAndWrite(buf *bytes.Buffer) (err error) {
 		}
 		buf.Write(bytes)
 	}
-	buf.WriteByte('\n')
-	return nil
+	buf.WriteByte(ConstListEnd)
+	return
 }
 
-func DecodeConstant(raw []byte) (c Constant, err error) {
-	kind := raw[0]
-	rawConstant := raw[1:]
+func ReadConstants(rd io.Reader) (data Data, err error) {
+	r := bufio.NewReader(rd)
+	for {
+		constant, err := ReadConstant(r)
+		if err != nil {
+			return nil, err
+		}
+		if constant == nil {
+			return data, nil
+		}
+		data = append(data, constant)
+	}
+}
+
+func ReadConstant(r *bufio.Reader) (c Constant, err error) {
+	kind, err := r.ReadByte()
+	if err != nil {
+		return
+	}
 	switch kind {
 	case ConstTypeInt:
-		return DecodeConstantInt(rawConstant)
+		return ReadConstantInt(r)
+
+	case ConstListEnd:
+		return nil, nil
 
 	default:
 		return nil, errors.New("unknown constant type")
 	}
 }
 
-func DecodeConstantInt(raw []byte) (decoded Int, err error) {
-	i, err := strconv.Atoi(string(raw))
-	if err != nil {
+func ReadConstantInt(r *bufio.Reader) (decoded Int, err error) {
+	raw := make([]byte, 4)
+	if _, err = io.ReadFull(r, raw); err != nil {
 		return
 	}
-	return Int(i), nil
-}
-
-func ReadConstants(r io.Reader) (data Data, err error) {
-	s := bufio.NewScanner(r)
-	s.Split(bufio.ScanLines)
-	for {
-		if ok := s.Scan(); !ok {
-			return nil, errors.New("failed to scan line")
-		}
-
-		text := strings.TrimSpace(s.Text())
-		if text == "" {
-			break
-		}
-
-		constant, err := DecodeConstant([]byte(text))
-		if err != nil {
-			return nil, err
-		}
-
-		data = append(data, constant)
-	}
-	return
+	return Int(convert.BytesToInt32(raw)), nil
 }

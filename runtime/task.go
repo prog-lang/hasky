@@ -17,7 +17,7 @@ type Task struct {
 	argi int
 	args []Object
 
-	addr int
+	addr int32
 	env  *Environment
 }
 
@@ -29,7 +29,7 @@ func NewMainTask(env *Environment) *Task {
 	return NewTask(mainArgumentCount, entrypointInstructionAddress, env)
 }
 
-func NewTask(argc, addr int, env *Environment) *Task {
+func NewTask(argc int, addr int32, env *Environment) *Task {
 	return &Task{
 		Stack: NewStack(),
 

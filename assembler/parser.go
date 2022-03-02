@@ -81,7 +81,7 @@ func parseLabel(line string) (label string, err error) {
 	return matches[1], nil
 }
 
-func parseInstruction(line string) (opcode int, operand string, err error) {
+func parseInstruction(line string) (opcode int32, operand string, err error) {
 	fields := strings.Fields(line)
 	switch len(fields) {
 	case 1:
@@ -96,7 +96,7 @@ func parseInstruction(line string) (opcode int, operand string, err error) {
 	}
 }
 
-func justOpcode(fields []string) (opcode int, operand string, err error) {
+func justOpcode(fields []string) (opcode int32, operand string, err error) {
 	opcodeString := fields[0]
 	opcode, validOpcode := op.FromString(opcodeString)
 	if !validOpcode {
@@ -105,7 +105,11 @@ func justOpcode(fields []string) (opcode int, operand string, err error) {
 	return
 }
 
-func opcodeAndOperand(fields []string) (opcode int, operand string, err error) {
+func opcodeAndOperand(fields []string) (
+	opcode int32,
+	operand string,
+	err error,
+) {
 	opcode, operand, err = justOpcode(fields)
 	if err != nil {
 		return

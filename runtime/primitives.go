@@ -1,11 +1,13 @@
 package runtime
 
 import (
-	"strconv"
+	"github.com/sharpvik/hasky/runtime/convert"
 )
 
 const (
 	ConstTypeInt byte = iota
+
+	ConstListEnd //! signifies the end of the data section
 )
 
 var Nil Unit
@@ -18,13 +20,14 @@ func (Unit) Type() Type {
 
 /* Constants */
 
-type Int int
+type Int int32
 
 func (Int) Type() Type {
 	return TypeInt
 }
 
 func (i Int) Encode() (out []byte, err error) {
-	out = append([]byte{ConstTypeInt}, []byte(strconv.Itoa(int(i)))...)
-	return append(out, '\n'), nil
+	encoded := convert.Int32AsBytes(int32(i))
+	out = append([]byte{ConstTypeInt}, encoded...)
+	return
 }

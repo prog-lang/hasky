@@ -9,14 +9,14 @@ import (
 type Bytecode struct {
 	Data   runtime.Data
 	Code   runtime.Code
-	Labels map[string]int
+	Labels map[string]int32
 }
 
 func NewBytecode() *Bytecode {
 	return &Bytecode{
 		Data:   make(runtime.Data, 0),
 		Code:   make([]runtime.Instruction, 0),
-		Labels: make(map[string]int),
+		Labels: make(map[string]int32),
 	}
 }
 
@@ -28,7 +28,7 @@ func (ast AST) Bytecode() (bc *Bytecode, err error) {
 }
 
 func (bc *Bytecode) identifyLabels(ast AST) {
-	instructionCount := 0
+	var instructionCount int32 = 0
 	for _, line := range ast {
 		if line.Tag == TypeInstruction {
 			instructionCount++
@@ -64,12 +64,12 @@ func (bc *Bytecode) encode(i Instruction) (runtime.Instruction, error) {
 	}, nil
 }
 
-func (bc *Bytecode) operandAddress(operand *TaggedUnion) (addr int) {
+func (bc *Bytecode) operandAddress(operand *TaggedUnion) (addr int32) {
 	if operand == nil {
 		return 0
 	}
 	if operand.Tag == TypeOperandInt {
-		addr = len(bc.Data)
+		addr = int32(len(bc.Data))
 		bc.Data = append(bc.Data, runtime.Int(operand.Value.(int)))
 		return
 	}
