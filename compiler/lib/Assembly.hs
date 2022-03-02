@@ -45,7 +45,7 @@ withInt opcode int = Instruction (opcode, Just $ Int int)
 
 generate :: Module -> Assembly
 generate mod = Assembly
-  [ withName Closure "io:print"
+  [ withName Closure "print"
   , withInt Apply int
   , justOpcode Call
   , justOpcode Return

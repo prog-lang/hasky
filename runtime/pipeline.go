@@ -1,37 +1,34 @@
-package main
+package runtime
 
 import (
 	"bufio"
 	"io"
-	"log"
 	"os"
-
-	"github.com/sharpvik/hasky/runtime"
 )
 
-func main() {
-	name := os.Args[1]
+func RunFile(name string) (err error) {
 	file, err := os.Open(name)
 	if err != nil {
-		log.Fatal(err)
+		return
 	}
 
 	r, err := initReader(file)
 	if err != nil {
-		log.Fatal(err)
+		return
 	}
 
-	data, err := runtime.ReadData(r)
+	data, err := ReadData(r)
 	if err != nil {
-		log.Fatal(err)
+		return
 	}
 
-	code, err := runtime.ReadCode(r)
+	code, err := ReadCode(r)
 	if err != nil {
-		log.Fatal(err)
+		return
 	}
 
-	runtime.Start(runtime.NewEnvironment(data, code))
+	Start(NewEnvironment(data, code))
+	return
 }
 
 func initReader(r io.Reader) (bufr *bufio.Reader, err error) {

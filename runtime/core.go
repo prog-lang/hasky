@@ -10,6 +10,16 @@ var Core = []ClosureConstructor{
 	lazy(2, add),
 }
 
+var CoreNames = map[string]int{
+	"print": 0,
+	"add":   1,
+}
+
+func ClosureAddressFromName(name string) (addr int32, exists bool) {
+	address, exists := CoreNames[name]
+	return int32(address), exists
+}
+
 func lazy(argc int, function Function) ClosureConstructor {
 	return func() *Closure {
 		return NewClosure(argc, function)

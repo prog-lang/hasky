@@ -2,6 +2,7 @@ package assembler
 
 import (
 	"bytes"
+	"fmt"
 
 	"github.com/sharpvik/hasky/runtime"
 )
@@ -44,7 +45,7 @@ func (bc *Bytecode) generateCodeAndData(ast AST) (err error) {
 		if line.Tag == TypeLabel {
 			continue
 		}
-		instruction, err := bc.encode(line.Value.(Instruction))
+		instruction, err := bc.encodeInstruction(line.Value.(Instruction))
 		if err != nil {
 			return err
 		}
@@ -53,30 +54,51 @@ func (bc *Bytecode) generateCodeAndData(ast AST) (err error) {
 	return
 }
 
-func (bc *Bytecode) encode(i Instruction) (runtime.Instruction, error) {
+func (bc *Bytecode) encodeInstruction(
+	i Instruction) (instruction runtime.Instruction, err error) {
 	operand, err := parseOperand(i.Operand)
 	if err != nil {
-		return runtime.Instruction{}, err
+		return
+	}
+	operandAddress, err := bc.operandAddress(operand)
+	if err != nil {
+		return
 	}
 	return runtime.Instruction{
 		Opcode:  i.Opcode,
-		Operand: bc.operandAddress(operand),
+		Operand: operandAddress,
 	}, nil
 }
 
-func (bc *Bytecode) operandAddress(operand *TaggedUnion) (addr int32) {
+func (bc *Bytecode) operandAddress(operand *TaggedUnion) (addr int32, err error) {
 	if operand == nil {
-		return 0
+		return 0, nil
 	}
-	if operand.Tag == TypeOperandInt {
+	switch operand.Tag {
+	case TypeOperandInt:
 		addr = int32(len(bc.Data))
 		bc.Data = append(bc.Data, runtime.Int(operand.Value.(int)))
-		return
-	}
-	if operand.Tag == TypeOperandName {
-		return bc.Labels[operand.Value.(string)]
+
+	case TypeOperandName:
+		name := operand.Value.(string)
+		addr, err = bc.operandNameAddress(name)
+
+	default:
+		err = fmt.Errorf("unknown operand tag: %d", operand.Tag)
 	}
 	return
+}
+
+func (bc *Bytecode) operandNameAddress(name string) (addr int32, err error) {
+	addr, exists := bc.Labels[name]
+	if exists {
+		return addr, nil
+	}
+	addr, exists = runtime.ClosureAddressFromName(name)
+	if exists {
+		return addr, nil
+	}
+	return 0, fmt.Errorf("unknown name in operand: %s", name)
 }
 
 func (bc *Bytecode) Encode() (code []byte, err error) {

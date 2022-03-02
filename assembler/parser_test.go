@@ -18,7 +18,7 @@ func TestParseLines(t *testing.T) {
 		call
 		return
 	`
-	ast, errs := parse(asm)
+	ast, errs := Parse(asm)
 	assert.Len(t, errs, 0)
 	assert.Len(t, ast, 6)
 	label := ast[0]

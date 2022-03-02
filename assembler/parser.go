@@ -28,6 +28,14 @@ type ErrorLine struct {
 	Error  error
 }
 
+func (em ErrorMap) Error() string {
+	var buf strings.Builder
+	for _, errLine := range em {
+		buf.WriteString(errLine.Error.Error() + "\n")
+	}
+	return buf.String()
+}
+
 func NewOperandName(name string) *TaggedUnion {
 	return NewTaggedUnion(TypeOperandName, name)
 }
@@ -36,7 +44,7 @@ func NewOperandInt(i int) *TaggedUnion {
 	return NewTaggedUnion(TypeOperandInt, i)
 }
 
-func parse(input string) (ast AST, errs ErrorMap) {
+func Parse(input string) (ast AST, errs ErrorMap) {
 	lines := strings.Split(input, "\n")
 	ast = make([]*TaggedUnion, 0, len(lines))
 	errs = make(ErrorMap, 0, len(lines))
