@@ -5,13 +5,8 @@ import (
 	"os"
 )
 
-func AssembleFile(name string) (err error) {
-	file, err := os.Open(name)
-	if err != nil {
-		return
-	}
-
-	input, err := io.ReadAll(file)
+func Assemble(r io.Reader) (err error) {
+	input, err := io.ReadAll(r)
 	if err != nil {
 		return
 	}
@@ -40,6 +35,14 @@ func AssembleFile(name string) (err error) {
 	return
 }
 
+func AssembleFile(name string) (err error) {
+	file, err := os.Open(name)
+	if err != nil {
+		return
+	}
+	return Assemble(file)
+}
+
 func createExecutableFile(name string) (out *os.File, err error) {
-	return os.OpenFile(name, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0744)
+	return os.OpenFile(name, os.O_CREATE|os.O_WRONLY, 0744)
 }
