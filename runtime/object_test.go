@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"bufio"
 	"bytes"
 	"testing"
 
@@ -15,7 +16,7 @@ func TestConstants(t *testing.T) {
 	assert.NoError(t, err)
 	encodedData := buf.Bytes()
 
-	decodedData, err := ReadConstants(bytes.NewBuffer(encodedData))
+	decodedData, err := ReadData(bufio.NewReader(bytes.NewBuffer(encodedData)))
 	assert.NoError(t, err)
 	two := decodedData[0]
 	forty := decodedData[1]

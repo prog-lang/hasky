@@ -23,8 +23,7 @@ func (data Data) EncodeAndWrite(buf *bytes.Buffer) (err error) {
 	return
 }
 
-func ReadConstants(rd io.Reader) (data Data, err error) {
-	r := bufio.NewReader(rd)
+func ReadData(r *bufio.Reader) (data Data, err error) {
 	for {
 		constant, err := ReadConstant(r)
 		if err != nil {

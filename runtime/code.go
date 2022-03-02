@@ -2,6 +2,7 @@ package runtime
 
 import (
 	"bytes"
+	"io"
 
 	"github.com/sharpvik/hasky/runtime/convert"
 )
@@ -32,4 +33,32 @@ func (code Code) EncodeAndWrite(buf *bytes.Buffer) (err error) {
 		}
 	}
 	return
+}
+
+func ReadInstruction(r io.Reader) (i Instruction, err error) {
+	opcode, err := convert.ReadInt32(r)
+	if err == io.EOF {
+		return Instruction{}, io.EOF
+	}
+	if err != nil {
+		return Instruction{}, io.ErrUnexpectedEOF
+	}
+	operand, err := convert.ReadInt32(r)
+	if err != nil {
+		return Instruction{}, io.ErrUnexpectedEOF
+	}
+	return Instruction{opcode, operand}, nil
+}
+
+func ReadCode(r io.Reader) (code Code, err error) {
+	for {
+		instruction, err := ReadInstruction(r)
+		if err == io.EOF {
+			return code, nil
+		}
+		if err != nil {
+			return nil, err
+		}
+		code = append(code, instruction)
+	}
 }
