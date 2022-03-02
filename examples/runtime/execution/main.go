@@ -13,7 +13,7 @@ func init() {
 }
 
 func main() {
-	data := []runtime.Object{
+	data := runtime.Data{
 		runtime.Int(2),
 		runtime.Int(40),
 	}

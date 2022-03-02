@@ -11,17 +11,16 @@ import (
 
 type Data []Constant
 
-func (data Data) Encode() (out []byte, err error) {
-	var buf bytes.Buffer
+func (data Data) EncodeAndWrite(buf *bytes.Buffer) (err error) {
 	for _, constant := range data {
 		bytes, err := constant.Encode()
 		if err != nil {
-			return nil, err
+			return err
 		}
 		buf.Write(bytes)
 	}
 	buf.WriteByte('\n')
-	return buf.Bytes(), nil
+	return nil
 }
 
 func DecodeConstant(raw []byte) (c Constant, err error) {

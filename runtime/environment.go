@@ -5,18 +5,13 @@ import (
 	"os"
 )
 
-type Instruction struct {
-	Opcode  int
-	Operand int
-}
-
 type Environment struct {
-	Data []Object
-	Code []Instruction
+	Data Data
+	Code Code
 	Core []ClosureConstructor
 }
 
-func NewEnvironment(data []Object, code []Instruction) *Environment {
+func NewEnvironment(data Data, code Code) *Environment {
 	return &Environment{
 		Data: data,
 		Code: code,

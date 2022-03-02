@@ -8,15 +8,17 @@ import (
 )
 
 func TestConstants(t *testing.T) {
-	data := Data{Int(2), Int(40)}
+	data := Data{Int(2), Int(-40)}
 
-	encodedData, err := data.Encode()
+	var buf bytes.Buffer
+	err := data.EncodeAndWrite(&buf)
 	assert.NoError(t, err)
+	encodedData := buf.Bytes()
 
 	decodedData, err := ReadConstants(bytes.NewBuffer(encodedData))
 	assert.NoError(t, err)
 	two := decodedData[0]
 	forty := decodedData[1]
 	assert.Equal(t, Int(2), two.(Int))
-	assert.Equal(t, Int(40), forty.(Int))
+	assert.Equal(t, Int(-40), forty.(Int))
 }

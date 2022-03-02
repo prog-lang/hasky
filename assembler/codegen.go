@@ -1,20 +1,22 @@
 package assembler
 
 import (
+	"bytes"
+
 	"github.com/sharpvik/hasky/runtime"
 )
 
 type Bytecode struct {
+	Data   runtime.Data
+	Code   runtime.Code
 	Labels map[string]int
-	Data   []runtime.Constant
-	Code   []runtime.Instruction
 }
 
 func NewBytecode() *Bytecode {
 	return &Bytecode{
-		Labels: make(map[string]int),
-		Data:   make([]runtime.Constant, 0),
+		Data:   make(runtime.Data, 0),
 		Code:   make([]runtime.Instruction, 0),
+		Labels: make(map[string]int),
 	}
 }
 
@@ -77,6 +79,14 @@ func (bc *Bytecode) operandAddress(operand *TaggedUnion) (addr int) {
 	return
 }
 
-func (bc *Bytecode) Bytes() (code []byte) {
-	return
+func (bc *Bytecode) Encode() (code []byte, err error) {
+	var buf bytes.Buffer
+	buf.WriteString("#!/usr/bin/env hasky\n")
+	if err = bc.Data.EncodeAndWrite(&buf); err != nil {
+		return
+	}
+	if err = bc.Code.EncodeAndWrite(&buf); err != nil {
+		return
+	}
+	return buf.Bytes(), nil
 }
