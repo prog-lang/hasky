@@ -31,7 +31,7 @@ token tok = Parser aux
       $  Message (0, 0)
       $  "If you see this error, it means that Viktor really messed up with\n"
       ++ "the parser... Please open an issue at "
-      ++ "https://github.com/sharpvik/hasky/issues, citing the following:\n\n"
+      ++ "https://github.com/prog-lang/hasky/issues, citing the following:\n\n"
       ++ "Expected token: "
       ++ show tok
       ++ "\nBut token stream was exhausted.\n\n"

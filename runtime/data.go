@@ -6,7 +6,7 @@ import (
 	"errors"
 	"io"
 
-	"github.com/sharpvik/hasky/runtime/convert"
+	"github.com/prog-lang/hasky/runtime/convert"
 )
 
 type Data []Constant

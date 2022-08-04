@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	op "github.com/sharpvik/hasky/runtime/opcode"
+	op "github.com/prog-lang/hasky/runtime/opcode"
 )
 
 const (

@@ -4,8 +4,8 @@ import (
 	"io"
 	"log"
 
-	"github.com/sharpvik/hasky/runtime"
-	"github.com/sharpvik/hasky/runtime/opcode"
+	"github.com/prog-lang/hasky/runtime"
+	"github.com/prog-lang/hasky/runtime/opcode"
 )
 
 func init() {

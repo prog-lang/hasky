@@ -10,8 +10,8 @@ import (
 	"os/exec"
 	"path"
 
-	"github.com/sharpvik/hasky/assembler"
-	"github.com/sharpvik/hasky/runtime"
+	"github.com/prog-lang/hasky/assembler"
+	"github.com/prog-lang/hasky/runtime"
 )
 
 var ErrFailedToCompile = errors.New("failed to compile")

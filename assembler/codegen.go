@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/sharpvik/hasky/runtime"
+	"github.com/prog-lang/hasky/runtime"
 )
 
 type Bytecode struct {

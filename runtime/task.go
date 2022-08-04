@@ -3,7 +3,7 @@ package runtime
 import (
 	"log"
 
-	"github.com/sharpvik/hasky/runtime/opcode"
+	"github.com/prog-lang/hasky/runtime/opcode"
 )
 
 // Task represents a closure that encapsulates its environment and arguments for
