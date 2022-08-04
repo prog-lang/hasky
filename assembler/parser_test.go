@@ -1,6 +1,7 @@
 package assembler
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -18,7 +19,7 @@ func TestParseLines(t *testing.T) {
 		call
 		return
 	`
-	ast, errs := Parse(asm)
+	ast, errs := ParseString(asm)
 	assert.Len(t, errs, 0)
 	assert.Len(t, ast, 6)
 	label := ast[0]
@@ -64,4 +65,8 @@ func TestParseLine(t *testing.T) {
 	assert.Equal(t,
 		Instruction{op.Closure, "core:print"},
 		instruction.Value.(Instruction))
+}
+
+func ParseString(asm string) (AST, ErrorMap) {
+	return Parse(LineStream(strings.NewReader(asm)))
 }

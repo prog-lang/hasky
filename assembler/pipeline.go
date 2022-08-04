@@ -6,12 +6,7 @@ import (
 )
 
 func Assemble(r io.Reader) (err error) {
-	input, err := io.ReadAll(r)
-	if err != nil {
-		return
-	}
-
-	ast, errs := Parse(string(input))
+	ast, errs := Parse(LineStream(r))
 	if len(errs) != 0 {
 		return errs
 	}
