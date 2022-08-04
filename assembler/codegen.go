@@ -30,32 +30,36 @@ func (ast AST) Bytecode() (bc *Bytecode, err error) {
 
 func (bc *Bytecode) identifyLabels(ast AST) {
 	var instructionCount int32 = 0
-	for _, line := range ast {
-		if line.Tag == TypeInstruction {
+	for _, node := range ast {
+		switch node.(type) {
+		case *Instruction:
 			instructionCount++
-		} else {
-			label := line.Value.(string)
-			bc.Labels[label] = instructionCount
+		case *Label:
+			bc.Labels[node.(*Label).Text] = instructionCount
 		}
 	}
 }
 
 func (bc *Bytecode) generateCodeAndData(ast AST) (err error) {
-	for _, line := range ast {
-		if line.Tag == TypeLabel {
+	for _, node := range ast {
+		switch node.(type) {
+		case *Instruction:
+			instruction, err := bc.encodeInstruction(node.(*Instruction))
+			if err != nil {
+				return err
+			}
+			bc.Code = append(bc.Code, instruction)
+		case *Label:
 			continue
 		}
-		instruction, err := bc.encodeInstruction(line.Value.(Instruction))
-		if err != nil {
-			return err
-		}
-		bc.Code = append(bc.Code, instruction)
 	}
 	return
 }
 
-func (bc *Bytecode) encodeInstruction(
-	i Instruction) (instruction runtime.Instruction, err error) {
+func (bc *Bytecode) encodeInstruction(i *Instruction) (
+	instruction runtime.Instruction,
+	err error,
+) {
 	operand, err := parseOperand(i.Operand)
 	if err != nil {
 		return
@@ -70,21 +74,16 @@ func (bc *Bytecode) encodeInstruction(
 	}, nil
 }
 
-func (bc *Bytecode) operandAddress(operand *TaggedUnion) (addr int32, err error) {
+func (bc *Bytecode) operandAddress(operand Operand) (addr int32, err error) {
 	if operand == nil {
 		return 0, nil
 	}
-	switch operand.Tag {
-	case TypeOperandInt:
+	switch operand.(type) {
+	case *OperandInt:
 		addr = int32(len(bc.Data))
-		bc.Data = append(bc.Data, runtime.Int(operand.Value.(int)))
-
-	case TypeOperandName:
-		name := operand.Value.(string)
-		addr, err = bc.operandNameAddress(name)
-
-	default:
-		err = fmt.Errorf("unknown operand tag: %d", operand.Tag)
+		bc.Data = append(bc.Data, runtime.Int(operand.(*OperandInt).Int))
+	case *OperandName:
+		addr, err = bc.operandNameAddress(operand.(*OperandName).Text)
 	}
 	return
 }

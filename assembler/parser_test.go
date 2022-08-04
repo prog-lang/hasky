@@ -58,13 +58,13 @@ func TestParseLine(t *testing.T) {
 
 	label, err := parseLine("core:io=")
 	assert.NoError(t, err)
-	assert.Equal(t, "core:io", label.Value.(string))
+	assert.Equal(t, "core:io", label.(*Label).Text)
 
 	instruction, err := parseLine("  closure core:print")
 	assert.NoError(t, err)
 	assert.Equal(t,
-		Instruction{op.Closure, "core:print"},
-		instruction.Value.(Instruction))
+		&Instruction{op.Closure, "core:print"},
+		instruction.(*Instruction))
 }
 
 func ParseString(asm string) (AST, ErrorMap) {

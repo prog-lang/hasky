@@ -10,11 +10,6 @@ import (
 	op "github.com/prog-lang/hasky/runtime/opcode"
 )
 
-const (
-	TypeOperandInt = iota
-	TypeOperandName
-)
-
 var (
 	ErrBadLineParse        = errors.New("bad line parse")
 	ErrBadLabelParse       = errors.New("bad label parse")
@@ -29,6 +24,21 @@ type ErrorLine struct {
 	Error  error
 }
 
+type Operand interface {
+	Operand()
+}
+
+type OperandName struct {
+	Text string
+}
+
+type OperandInt struct {
+	Int int
+}
+
+func (*OperandName) Operand() {}
+func (*OperandInt) Operand()  {}
+
 func (em ErrorMap) Error() string {
 	var buf strings.Builder
 	for _, errLine := range em {
@@ -37,12 +47,12 @@ func (em ErrorMap) Error() string {
 	return buf.String()
 }
 
-func NewOperandName(name string) *TaggedUnion {
-	return NewTaggedUnion(TypeOperandName, name)
+func NewOperandName(name string) *OperandName {
+	return &OperandName{name}
 }
 
-func NewOperandInt(i int) *TaggedUnion {
-	return NewTaggedUnion(TypeOperandInt, i)
+func NewOperandInt(i int) *OperandInt {
+	return &OperandInt{i}
 }
 
 func Parse(lines fungi.Stream[string]) (ast AST, errs ErrorMap) {
@@ -57,7 +67,7 @@ func Parse(lines fungi.Stream[string]) (ast AST, errs ErrorMap) {
 	return
 }
 
-func parseLine(line string) (parsed *TaggedUnion, err error) {
+func parseLine(line string) (parsed SemanticNode, err error) {
 	trimmedLine := strings.TrimSpace(line)
 	if len(trimmedLine) == 0 {
 		return nil, nil
@@ -122,7 +132,7 @@ func opcodeAndOperand(fields []string) (
 	return
 }
 
-func parseOperand(operand string) (parsed *TaggedUnion, err error) {
+func parseOperand(operand string) (parsed Operand, err error) {
 	if operand == "" {
 		return
 	}
