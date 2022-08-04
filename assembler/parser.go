@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/getkalido/fungi"
 	op "github.com/prog-lang/hasky/runtime/opcode"
 )
 
@@ -44,20 +45,15 @@ func NewOperandInt(i int) *TaggedUnion {
 	return NewTaggedUnion(TypeOperandInt, i)
 }
 
-func Parse(input string) (ast AST, errs ErrorMap) {
-	lines := strings.Split(input, "\n")
-	ast = make([]*TaggedUnion, 0, len(lines))
-	errs = make(ErrorMap, 0, len(lines))
-
-	for i, line := range lines {
-		parsed, err := parseLine(line)
+func Parse(lines fungi.Stream[string]) (ast AST, errs ErrorMap) {
+	fungi.Loop(func(line *fungi.Indexed[string]) {
+		parsed, err := parseLine(line.Item)
 		if err != nil {
-			errs = append(errs, ErrorLine{i, err})
+			errs = append(errs, ErrorLine{line.Index, err})
 		} else if parsed != nil {
 			ast = append(ast, parsed)
 		}
-	}
-
+	})(fungi.Enumerate(lines))
 	return
 }
 
