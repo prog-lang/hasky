@@ -5,29 +5,28 @@ const (
 	TypeInstruction
 )
 
-type AST []*TaggedUnion
+type SemanticNode interface {
+	SemanticNode()
+}
+
+type AST []SemanticNode
+
+type Label struct {
+	Text string
+}
 
 type Instruction struct {
 	Opcode  int32
 	Operand string
 }
 
-type TaggedUnion struct {
-	Tag   int32
-	Value interface{}
+func (*Label) SemanticNode()       {}
+func (*Instruction) SemanticNode() {}
+
+func NewLabel(label string) *Label {
+	return &Label{label}
 }
 
-func NewTaggedUnion(tag int32, value interface{}) *TaggedUnion {
-	return &TaggedUnion{
-		Tag:   tag,
-		Value: value,
-	}
-}
-
-func NewLabel(label string) *TaggedUnion {
-	return NewTaggedUnion(TypeLabel, label)
-}
-
-func NewInstruction(opcode int32, operand string) *TaggedUnion {
-	return NewTaggedUnion(TypeInstruction, Instruction{opcode, operand})
+func NewInstruction(opcode int32, operand string) *Instruction {
+	return &Instruction{opcode, operand}
 }
