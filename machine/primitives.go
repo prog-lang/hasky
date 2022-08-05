@@ -1,4 +1,4 @@
-package runtime
+package machine
 
 import (
 	"github.com/prog-lang/hasky/runtime/convert"

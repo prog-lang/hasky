@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"io"
 	"os"
+
+	"github.com/prog-lang/hasky/machine"
 )
 
 func RunFile(name string) (err error) {
@@ -17,17 +19,17 @@ func RunFile(name string) (err error) {
 		return
 	}
 
-	data, err := ReadData(r)
+	data, err := machine.ReadData(r)
 	if err != nil {
 		return
 	}
 
-	code, err := ReadCode(r)
+	code, err := machine.ReadCode(r)
 	if err != nil {
 		return
 	}
 
-	Start(NewEnvironment(data, code))
+	machine.Start(machine.NewEnvironment(data, code, Core))
 	return
 }
 
