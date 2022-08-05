@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/getkalido/fungi"
-	op "github.com/prog-lang/hasky/runtime/opcode"
+	op "github.com/prog-lang/hasky/machine/opcode"
 )
 
 var (

@@ -1,4 +1,4 @@
-package runtime
+package machine
 
 type Stack struct {
 	stack []Object

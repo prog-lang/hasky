@@ -1,4 +1,4 @@
-package runtime
+package machine
 
 import (
 	"log"
@@ -11,11 +11,15 @@ type Environment struct {
 	Core []ClosureConstructor
 }
 
-func NewEnvironment(data Data, code Code) *Environment {
+func NewEnvironment(
+	data Data,
+	code Code,
+	core []ClosureConstructor,
+) *Environment {
 	return &Environment{
 		Data: data,
 		Code: code,
-		Core: Core,
+		Core: core,
 	}
 }
 

@@ -1,9 +1,9 @@
-package runtime
+package machine
 
 import (
 	"log"
 
-	"github.com/prog-lang/hasky/runtime/opcode"
+	"github.com/prog-lang/hasky/machine/opcode"
 )
 
 // Task represents a closure that encapsulates its environment and arguments for

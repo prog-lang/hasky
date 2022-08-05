@@ -1,4 +1,4 @@
-package runtime
+package machine
 
 // Commands array is a complete mapping of bytecode.Opcode to Command that it is
 // meant to invoke.

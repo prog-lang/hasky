@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	op "github.com/prog-lang/hasky/runtime/opcode"
+	op "github.com/prog-lang/hasky/machine/opcode"
 )
 
 func TestParseLines(t *testing.T) {

@@ -4,8 +4,9 @@ import (
 	"io"
 	"log"
 
+	"github.com/prog-lang/hasky/machine"
+	op "github.com/prog-lang/hasky/machine/opcode"
 	"github.com/prog-lang/hasky/runtime"
-	"github.com/prog-lang/hasky/runtime/opcode"
 )
 
 func init() {
@@ -13,21 +14,21 @@ func init() {
 }
 
 func main() {
-	data := runtime.Data{
-		runtime.Int(2),
-		runtime.Int(40),
+	data := machine.Data{
+		machine.Int(2),
+		machine.Int(40),
 	}
 
-	code := []runtime.Instruction{
-		{opcode.Closure, 0},
-		{opcode.Closure, 1},
-		{opcode.Apply, 0},
-		{opcode.Apply, 1},
-		{opcode.Call, 0},
-		{opcode.Charge, 0},
-		{opcode.Call, 0},
-		{opcode.Return, 0},
+	code := []machine.Instruction{
+		{op.Closure, 0},
+		{op.Closure, 1},
+		{op.Apply, 0},
+		{op.Apply, 1},
+		{op.Call, 0},
+		{op.Charge, 0},
+		{op.Call, 0},
+		{op.Return, 0},
 	}
 
-	runtime.Start(runtime.NewEnvironment(data, code))
+	machine.Start(machine.NewEnvironment(data, code, runtime.Core))
 }

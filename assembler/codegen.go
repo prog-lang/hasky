@@ -4,19 +4,20 @@ import (
 	"bytes"
 	"fmt"
 
+	"github.com/prog-lang/hasky/machine"
 	"github.com/prog-lang/hasky/runtime"
 )
 
 type Bytecode struct {
-	Data   runtime.Data
-	Code   runtime.Code
+	Data   machine.Data
+	Code   machine.Code
 	Labels map[string]int32
 }
 
 func NewBytecode() *Bytecode {
 	return &Bytecode{
-		Data:   make(runtime.Data, 0),
-		Code:   make([]runtime.Instruction, 0),
+		Data:   make(machine.Data, 0),
+		Code:   make([]machine.Instruction, 0),
 		Labels: make(map[string]int32),
 	}
 }
@@ -57,7 +58,7 @@ func (bc *Bytecode) generateCodeAndData(ast AST) (err error) {
 }
 
 func (bc *Bytecode) encodeInstruction(i *Instruction) (
-	instruction runtime.Instruction,
+	instruction machine.Instruction,
 	err error,
 ) {
 	operand, err := parseOperand(i.Operand)
@@ -68,7 +69,7 @@ func (bc *Bytecode) encodeInstruction(i *Instruction) (
 	if err != nil {
 		return
 	}
-	return runtime.Instruction{
+	return machine.Instruction{
 		Opcode:  i.Opcode,
 		Operand: operandAddress,
 	}, nil
@@ -81,7 +82,7 @@ func (bc *Bytecode) operandAddress(operand Operand) (addr int32, err error) {
 	switch operand.(type) {
 	case *OperandInt:
 		addr = int32(len(bc.Data))
-		bc.Data = append(bc.Data, runtime.Int(operand.(*OperandInt).Int))
+		bc.Data = append(bc.Data, machine.Int(operand.(*OperandInt).Int))
 	case *OperandName:
 		addr, err = bc.operandNameAddress(operand.(*OperandName).Text)
 	}
