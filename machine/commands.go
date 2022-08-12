@@ -1,8 +1,8 @@
 package machine
 
-// Commands array is a complete mapping of bytecode.Opcode to Command that it is
-// meant to invoke.
-var Commands = [15]Command{
+// InstructionSet array is a complete mapping of bytecode.Opcode to Command that
+// it is meant to invoke.
+var InstructionSet = [15]Command{
 	closure,
 	task(0),
 	task(1),

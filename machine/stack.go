@@ -30,8 +30,12 @@ func (s *Stack) Peek() (o Object) {
 	return s.stack[s.top()]
 }
 
+func (s *Stack) Len() int {
+	return len(s.stack)
+}
+
 func (s *Stack) Empty() bool {
-	return len(s.stack) == 0
+	return s.Len() == 0
 }
 
 func (s *Stack) top() int {

@@ -6,8 +6,9 @@ import (
 	"github.com/prog-lang/hasky/machine/opcode"
 )
 
-// Task represents a closure that encapsulates its environment and arguments for
-// future execution.
+// Task represents a function that encapsulates its environment and arguments
+// for future execution. User defined functions are represented as Tasks under
+// the hood.
 //
 // Task implements Object, Callable.
 type Task struct {
@@ -18,18 +19,18 @@ type Task struct {
 	args []Object
 
 	addr int32
-	env  *Environment
+	env  *Env
 }
 
-// NewMainTask returns a Task that expects no arguments - it represents the
+// MainTask returns a Task that expects no arguments - it represents the
 // entrypoint of the whole program with the following type: Task ().
-func NewMainTask(env *Environment) *Task {
+func MainTask(env *Env) *Task {
 	const entrypointInstructionAddress = 0
 	const mainArgumentCount = 0
 	return NewTask(mainArgumentCount, entrypointInstructionAddress, env)
 }
 
-func NewTask(argc int, addr int32, env *Environment) *Task {
+func NewTask(argc int, addr int32, env *Env) *Task {
 	return &Task{
 		Stack: NewStack(),
 
@@ -42,9 +43,7 @@ func NewTask(argc int, addr int32, env *Environment) *Task {
 	}
 }
 
-func (t *Task) Type() Type {
-	return TypeClosure
-}
+func (t *Task) Object() {}
 
 func (t *Task) Apply(arg Object) {
 	t.args[t.argi] = arg
@@ -84,8 +83,8 @@ func (t *Task) fetch() (instruction Instruction) {
 }
 
 func (t *Task) decode(instruction Instruction) (action Action, done bool) {
-	if instruction.Opcode == opcode.Return {
+	if instruction.Opcode == opcode.RETURN {
 		return nil, true
 	}
-	return Commands[instruction.Opcode](instruction.Operand), false
+	return InstructionSet[instruction.Opcode](instruction.Operand), false
 }

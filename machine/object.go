@@ -1,15 +1,7 @@
 package machine
 
-type Type int
-
-const (
-	TypeClosure Type = iota
-	TypeUnit
-	TypeInt
-)
-
 type Object interface {
-	Type() Type
+	Object()
 }
 
 type Constant interface {

@@ -5,35 +5,35 @@ import (
 	"os"
 )
 
-type Environment struct {
+type Env struct {
 	Data Data
 	Code Code
-	Core []ClosureConstructor
+	Core []LambdaConstructor
 }
 
-func NewEnvironment(
+func NewEnv(
 	data Data,
 	code Code,
-	core []ClosureConstructor,
-) *Environment {
-	return &Environment{
+	core []LambdaConstructor,
+) *Env {
+	return &Env{
 		Data: data,
 		Code: code,
 		Core: core,
 	}
 }
 
-func Start(env *Environment) {
+func Start(env *Env) {
 	log.Print("starting runtime from environment ...")
 	defer gracefulExit()
 	setupAndStart(env)
 }
 
-func setupAndStart(env *Environment) {
+func setupAndStart(env *Env) {
 	log.Print("initialising the main thunk ...")
-	thunk := NewMainTask(env)
+	main := MainTask(env)
 	log.Print("starting execution by head call ...")
-	thunk.Call()
+	main.Call()
 }
 
 func gracefulExit() {
