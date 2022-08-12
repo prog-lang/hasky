@@ -9,15 +9,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMachine(t *testing.T) {
+func TestRuntime(t *testing.T) {
 	data := machine.Data{
 		machine.Int(2),
 		machine.Int(40),
 	}
 
 	code := []machine.Instruction{
-		{CLOSURE, 0},
-		{CLOSURE, 1},
+		{NATIVE, 0},
+		{NATIVE, 1},
 		{APPLY, 0},
 		{APPLY, 1},
 		{CALL, 0},

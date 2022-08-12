@@ -6,7 +6,7 @@ import (
 	"github.com/prog-lang/hasky/machine"
 )
 
-// Core is a list of Closure constructors for all native functions.
+// Core is a list of lazy lambdas for all native functions.
 var Core = []machine.LazyLambda{
 	lazy(printout, 1),
 	lazy(add, 2),
@@ -24,7 +24,7 @@ func LambdaAddr(name string) (addr int32, exists bool) {
 
 func lazy(fn machine.Evaluator, argc int) machine.LazyLambda {
 	return func() *machine.Lambda {
-		return machine.NewClosure(argc, fn)
+		return machine.NewLambda(argc, fn)
 	}
 }
 
