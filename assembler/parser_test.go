@@ -25,7 +25,7 @@ func TestParseLines(t *testing.T) {
 	label := ast[0]
 	closure := ast[1]
 	assert.Equal(t, NewLabel("main:main"), label)
-	assert.Equal(t, NewInstruction(op.Closure, "io:print"), closure)
+	assert.Equal(t, NewInstruction(op.CLOSURE, "io:print"), closure)
 }
 
 func TestParseLabel(t *testing.T) {
@@ -41,7 +41,7 @@ func TestParseLabel(t *testing.T) {
 func TestParseInstruction(t *testing.T) {
 	opcode, operand, err := parseInstruction("closure core:print")
 	assert.NoError(t, err)
-	assert.Equal(t, op.Closure, opcode)
+	assert.Equal(t, op.CLOSURE, opcode)
 	assert.Equal(t, "core:print", operand)
 
 	_, _, err = parseInstruction("task10 0")
@@ -63,7 +63,7 @@ func TestParseLine(t *testing.T) {
 	instruction, err := parseLine("  closure core:print")
 	assert.NoError(t, err)
 	assert.Equal(t,
-		&Instruction{op.Closure, "core:print"},
+		&Instruction{op.CLOSURE, "core:print"},
 		instruction.(*Instruction))
 }
 

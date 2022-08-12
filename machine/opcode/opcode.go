@@ -6,44 +6,44 @@ import (
 
 const (
 	/* Callables */
-	Closure int32 = iota
-	Task0
-	Task1
-	Task2
-	Task3
-	Task4
-	Task5
-	Task6
-	Task7
-	Task8
-	Task9
-	Apply
-	Charge
-	Call
+	CLOSURE int32 = iota
+	TASK0
+	TASK1
+	TASK2
+	TASK3
+	TASK4
+	TASK5
+	TASK6
+	TASK7
+	TASK8
+	TASK9
+	APPLY
+	CHARGE
+	CALL
 
 	/* Stack */
-	Push
+	PUSH
 
-	Return
+	RETURN
 )
 
 var opcodes = map[string]int32{
-	"closure": Closure,
-	"task0":   Task0,
-	"task1":   Task1,
-	"task2":   Task2,
-	"task3":   Task3,
-	"task4":   Task4,
-	"task5":   Task5,
-	"task6":   Task6,
-	"task7":   Task7,
-	"task8":   Task8,
-	"task9":   Task9,
-	"apply":   Apply,
-	"charge":  Charge,
-	"call":    Call,
-	"push":    Push,
-	"return":  Return,
+	"closure": CLOSURE,
+	"task0":   TASK0,
+	"task1":   TASK1,
+	"task2":   TASK2,
+	"task3":   TASK3,
+	"task4":   TASK4,
+	"task5":   TASK5,
+	"task6":   TASK6,
+	"task7":   TASK7,
+	"task8":   TASK8,
+	"task9":   TASK9,
+	"apply":   APPLY,
+	"charge":  CHARGE,
+	"call":    CALL,
+	"push":    PUSH,
+	"return":  RETURN,
 }
 
 func FromString(s string) (opcode int32, exists bool) {

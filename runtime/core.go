@@ -7,7 +7,7 @@ import (
 )
 
 // Core is a list of Closure constructors for all native functions.
-var Core = []machine.ClosureConstructor{
+var Core = []machine.LambdaConstructor{
 	lazy(1, printout),
 	lazy(2, add),
 }
@@ -22,8 +22,8 @@ func ClosureAddressFromName(name string) (addr int32, exists bool) {
 	return int32(address), exists
 }
 
-func lazy(argc int, function machine.Function) machine.ClosureConstructor {
-	return func() *machine.Closure {
+func lazy(argc int, function machine.Evaluator) machine.LambdaConstructor {
+	return func() *machine.Lambda {
 		return machine.NewClosure(argc, function)
 	}
 }

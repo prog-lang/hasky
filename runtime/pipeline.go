@@ -13,8 +13,12 @@ func RunFile(name string) (err error) {
 	if err != nil {
 		return
 	}
+	defer file.Close()
+	return RunReader(file)
+}
 
-	r, err := initReader(file)
+func RunReader(rd io.Reader) (err error) {
+	r, err := initReader(rd)
 	if err != nil {
 		return
 	}
@@ -29,7 +33,7 @@ func RunFile(name string) (err error) {
 		return
 	}
 
-	machine.Start(machine.NewEnvironment(data, code, Core))
+	machine.Start(machine.NewEnv(data, code, Core))
 	return
 }
 
