@@ -13,8 +13,8 @@ func TestParseLines(t *testing.T) {
 	const asm = `
 	main:main=
 
-		closure io:print
-		push 1
+		native io:print
+		load 1
 		charge
 		call
 		return
@@ -23,9 +23,9 @@ func TestParseLines(t *testing.T) {
 	assert.Len(t, errs, 0)
 	assert.Len(t, ast, 6)
 	label := ast[0]
-	closure := ast[1]
+	native := ast[1]
 	assert.Equal(t, NewLabel("main:main"), label)
-	assert.Equal(t, NewInstruction(op.CLOSURE, "io:print"), closure)
+	assert.Equal(t, NewInstruction(op.NATIVE, "io:print"), native)
 }
 
 func TestParseLabel(t *testing.T) {
@@ -39,15 +39,15 @@ func TestParseLabel(t *testing.T) {
 }
 
 func TestParseInstruction(t *testing.T) {
-	opcode, operand, err := parseInstruction("closure core:print")
+	opcode, operand, err := parseInstruction("native core:print")
 	assert.NoError(t, err)
-	assert.Equal(t, op.CLOSURE, opcode)
+	assert.Equal(t, op.NATIVE, opcode)
 	assert.Equal(t, "core:print", operand)
 
 	_, _, err = parseInstruction("task10 0")
 	assert.ErrorIs(t, err, ErrBadInstructionParse)
 
-	_, _, err = parseInstruction("closure hello bye")
+	_, _, err = parseInstruction("native hello bye")
 	assert.ErrorIs(t, err, ErrBadInstructionParse)
 }
 
@@ -60,10 +60,10 @@ func TestParseLine(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "core:io", label.(*Label).Text)
 
-	instruction, err := parseLine("  closure core:print")
+	instruction, err := parseLine("  native core:print")
 	assert.NoError(t, err)
 	assert.Equal(t,
-		&Instruction{op.CLOSURE, "core:print"},
+		&Instruction{op.NATIVE, "core:print"},
 		instruction.(*Instruction))
 }
 

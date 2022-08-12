@@ -15,7 +15,7 @@ type Lambda struct {
 	eval Evaluator
 }
 
-func NewClosure(argc int, eval Evaluator) *Lambda {
+func NewLambda(argc int, eval Evaluator) *Lambda {
 	return &Lambda{
 		argc: argc,
 		argi: 0,

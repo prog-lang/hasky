@@ -1,9 +1,11 @@
 package machine
 
+import "github.com/prog-lang/hasky/machine/opcode"
+
 // InstructionSet array is a complete mapping of bytecode.Opcode to Command that
 // it is meant to invoke.
-var InstructionSet = [15]Command{
-	closure,
+var InstructionSet = [opcode.RETURN]Command{
+	native,
 	task(0),
 	task(1),
 	task(2),
@@ -18,7 +20,7 @@ var InstructionSet = [15]Command{
 	charge,
 	call,
 
-	push,
+	load,
 
 	//! return opcode must not be included here
 }
@@ -30,7 +32,7 @@ type Command func(operand int32) Action
 // Action is an effectful instruction that operates on a Task frame.
 type Action func(*Task)
 
-func closure(operand int32) Action {
+func native(operand int32) Action {
 	return func(task *Task) {
 		task.Push(task.env.Core[operand]())
 	}
@@ -63,7 +65,7 @@ func call(operand int32) Action {
 	}
 }
 
-func push(operand int32) Action {
+func load(operand int32) Action {
 	return func(task *Task) {
 		task.Push(task.env.Data[operand])
 	}

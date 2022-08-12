@@ -72,7 +72,7 @@ func (t *Task) step() (done bool) {
 	log.Print("decoded instruction")
 
 	execute(t)
-	log.Print("executed instruction")
+	log.Print("executed instruction:", t.Stack)
 	return
 }
 

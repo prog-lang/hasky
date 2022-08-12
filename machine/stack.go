@@ -1,5 +1,7 @@
 package machine
 
+import "fmt"
+
 type Stack struct {
 	stack []Object
 }
@@ -36,6 +38,10 @@ func (s *Stack) Len() int {
 
 func (s *Stack) Empty() bool {
 	return s.Len() == 0
+}
+
+func (s *Stack) String() string {
+	return fmt.Sprint(s.stack)
 }
 
 func (s *Stack) top() int {
