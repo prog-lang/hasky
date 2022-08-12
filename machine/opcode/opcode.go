@@ -6,6 +6,7 @@ import (
 
 const (
 	/* Callables */
+
 	CLOSURE int32 = iota
 	TASK0
 	TASK1
@@ -22,6 +23,7 @@ const (
 	CALL
 
 	/* Stack */
+
 	PUSH
 
 	RETURN

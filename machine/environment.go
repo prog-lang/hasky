@@ -8,13 +8,13 @@ import (
 type Env struct {
 	Data Data
 	Code Code
-	Core []LambdaConstructor
+	Core []LazyLambda
 }
 
 func NewEnv(
 	data Data,
 	code Code,
-	core []LambdaConstructor,
+	core []LazyLambda,
 ) *Env {
 	return &Env{
 		Data: data,

@@ -7,9 +7,9 @@ import (
 )
 
 // Core is a list of Closure constructors for all native functions.
-var Core = []machine.LambdaConstructor{
-	lazy(1, printout),
-	lazy(2, add),
+var Core = []machine.LazyLambda{
+	lazy(printout, 1),
+	lazy(add, 2),
 }
 
 var CoreNames = map[string]int{
@@ -17,20 +17,20 @@ var CoreNames = map[string]int{
 	"add":   1,
 }
 
-func ClosureAddressFromName(name string) (addr int32, exists bool) {
+func LambdaAddr(name string) (addr int32, exists bool) {
 	address, exists := CoreNames[name]
 	return int32(address), exists
 }
 
-func lazy(argc int, function machine.Evaluator) machine.LambdaConstructor {
+func lazy(fn machine.Evaluator, argc int) machine.LazyLambda {
 	return func() *machine.Lambda {
-		return machine.NewClosure(argc, function)
+		return machine.NewClosure(argc, fn)
 	}
 }
 
 func printout(args []machine.Object) machine.Object {
 	fmt.Println(args[0])
-	return machine.Nil
+	return machine.Unit
 }
 
 func add(args []machine.Object) machine.Object {

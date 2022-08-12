@@ -94,7 +94,7 @@ func (bc *Bytecode) operandNameAddress(name string) (addr int32, err error) {
 	if exists {
 		return addr, nil
 	}
-	addr, exists = runtime.ClosureAddressFromName(name)
+	addr, exists = runtime.LambdaAddr(name)
 	if exists {
 		return addr, nil
 	}

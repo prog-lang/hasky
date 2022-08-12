@@ -2,7 +2,7 @@ package machine
 
 type Evaluator func([]Object) Object
 
-type LambdaConstructor func() *Lambda
+type LazyLambda func() *Lambda
 
 // Lambda is a wrapper that encapsulates functional environment for native
 // runtime operations (e.g. arithmetic operations).

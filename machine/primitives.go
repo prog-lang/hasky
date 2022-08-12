@@ -10,11 +10,11 @@ const (
 	ConstListEnd //! signifies the end of the data section
 )
 
-var Nil Unit
+var Unit Tuple
 
-type Unit struct{}
+type Tuple []Object
 
-func (Unit) Object() {}
+func (Tuple) Object() {}
 
 /* Constants */
 
