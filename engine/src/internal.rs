@@ -1,26 +1,34 @@
 use crate::thunk::Thunk;
 
-pub type Instruction = fn(i32) -> Operation;
-pub type Operation = fn(&mut Thunk);
+pub type Instruction = fn(&mut Thunk);
 
 pub enum Opcode {
-    /// do nothing
+    /// Do nothing.
+    ///
+    /// `opcode: 0B`
     NOP,
-    /// return
+
+    /// Return from function.
+    ///
+    /// `opcode: 0B`
     RET,
     // RET must remain the last Opcode.
 }
 
+pub const OPCODE_BYTE_LENGTH: usize = 1;
+
 /// Instrustion set.
 pub const IS: [Instruction; Opcode::RET as usize + 1] = [
-    /* NOP */ |_| |_| {},
-    /* RET */ |_| |thunk| thunk.ret = true,
+    /* NOP */ |_| {},
+    /* RET */ |thunk| thunk.ret = true,
 ];
 
-pub fn op(o: Opcode) -> i32 {
-    o as i32
-}
+impl Opcode {
+    pub fn bin(self) -> u8 {
+        self as u8
+    }
 
-pub fn instruction(opcode: i32) -> Instruction {
-    IS[opcode as usize]
+    pub fn decode(opcode: u8) -> Instruction {
+        IS[opcode as usize]
+    }
 }
