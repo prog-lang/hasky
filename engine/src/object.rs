@@ -3,11 +3,14 @@ use std::fmt::Debug;
 
 use enum_as_inner::EnumAsInner;
 
+/// Objects are primary units of intormation upon which we operate. They can lie
+/// on the data stack or be part of machine data constants. Functions receive
+/// arguments as objects and *always* return an object.
 #[derive(EnumAsInner)]
 pub enum Object {
     Unit,
     Int(i32),
-    Fn(Box<dyn Callable>),
+    Function(Box<dyn Callable>),
 }
 
 pub trait Callable {
@@ -20,7 +23,7 @@ impl Debug for Object {
         match self {
             Self::Unit => write!(f, "Unit"),
             Self::Int(arg0) => f.debug_tuple("Int").field(arg0).finish(),
-            Self::Fn(_) => write!(f, "Fn"),
+            Self::Function(_) => write!(f, "Fn"),
         }
     }
 }
