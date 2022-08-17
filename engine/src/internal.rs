@@ -4,12 +4,18 @@ pub type Instruction = fn(i32) -> Operation;
 pub type Operation = fn(&mut Thunk);
 
 pub enum Opcode {
+    /// do nothing
     NOP,
-    // NOP must remain the last Opcode.
+    /// return
+    RET,
+    // RET must remain the last Opcode.
 }
 
 /// Instrustion set.
-pub const IS: [Instruction; Opcode::NOP as usize + 1] = [/* NOP */ |_| |_| {}];
+pub const IS: [Instruction; Opcode::RET as usize + 1] = [
+    /* NOP */ |_| |_| {},
+    /* RET */ |_| |thunk| thunk.ret = true,
+];
 
 pub fn op(o: Opcode) -> i32 {
     o as i32

@@ -6,12 +6,13 @@ use crate::object::{Callable, Object};
 pub struct Thunk {
     argc: i32,
     argi: i32,
-    args: Vec<Object>,
+    pub args: Vec<Object>,
 
-    env: Rc<Env>,
+    pub env: Rc<Env>,
     ip: i32,
+    pub ret: bool,
 
-    stack: Vec<Object>,
+    pub stack: Vec<Object>,
 }
 
 pub struct Env {
@@ -28,9 +29,8 @@ impl Callable for Thunk {
     }
 
     fn call(&mut self) -> Object {
-        let opcode = self.fetch();
-        let operation = self.decode(opcode);
-        self.execute(operation)
+        while self.cycle() {}
+        self.safe_pop()
     }
 }
 
@@ -42,6 +42,7 @@ impl Thunk {
             args: vec![],
             env: env,
             ip: ip,
+            ret: false,
             stack: vec![],
         }
     }
@@ -53,6 +54,13 @@ impl Thunk {
     fn feed(&mut self, o: Object) {
         self.argi += 1;
         self.args.push(o);
+    }
+
+    fn cycle(&mut self) -> bool {
+        let opcode = self.fetch();
+        let execute = self.decode(opcode);
+        execute(self);
+        !self.ret
     }
 
     fn fetch(&mut self) -> i32 {
@@ -67,16 +75,10 @@ impl Thunk {
         internal::instruction(opcode)(operand)
     }
 
-    fn execute(&mut self, operation: Operation) -> Object {
-        operation(self);
-        self.safe_pop()
-    }
-
     fn safe_pop(&mut self) -> Object {
-        if let Some(o) = self.stack.pop() {
-            o
-        } else {
-            Object::Unit
+        match self.stack.pop() {
+            Some(o) => o,
+            _ => Object::Unit,
         }
     }
 }
@@ -91,7 +93,7 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let code = vec![op(NOP), 0];
+        let code = vec![op(NOP), 0, op(RET), 0];
         let env = Env { code };
         let mut thunk = Thunk::main(env);
         let result = thunk.call();
