@@ -1,13 +1,13 @@
 use crate::object::{Callable, Object};
 
 pub struct Lambda {
-    argc: i32,
-    argi: i32,
+    argc: usize,
+    argi: usize,
     args: Vec<Object>,
     eval: Eval,
 }
 
-type Eval = fn(&Vec<Object>) -> Object;
+pub type Eval = fn(&Vec<Object>) -> Object;
 
 impl Callable for Lambda {
     fn apply(&mut self, o: Object) {
@@ -23,7 +23,7 @@ impl Callable for Lambda {
 }
 
 impl Lambda {
-    pub fn new(eval: Eval, argc: i32) -> Self {
+    pub fn new(eval: Eval, argc: usize) -> Self {
         Self {
             argc: argc,
             argi: 0,
