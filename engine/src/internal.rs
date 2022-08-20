@@ -42,13 +42,10 @@ pub const IS: [Instruction; Opcode::RET as usize + 1] = [
         let addr = thunk
             .read_u32::<BigEndian>()
             .expect("failed to read native function address");
-        let argc = thunk
-            .read_u32::<BigEndian>()
-            .expect("failed to read function argument count");
         let eval = core::eval_from_addr(addr as usize);
         thunk
             .stack
-            .push(Object::Function(Box::new(Lambda::new(eval, argc as usize))))
+            .push(Object::Function(Box::new(Lambda::new(eval))))
     },
     /* RET */ |thunk| thunk.ret = true,
 ];
