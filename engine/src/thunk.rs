@@ -100,10 +100,6 @@ mod tests {
             0, //    *-- native function address: i32 = 0
             0, //    |
             0, // <--*
-            0, // <--*
-            0, //    *-- function argument count: i32 = 2
-            0, //    |
-            2, // <--*
             RET.bin(),
         ];
         let env = Machine::new(code);
