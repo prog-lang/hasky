@@ -116,30 +116,38 @@ mod tests {
             8, // <--*
             CALL.bin(),
             RET.bin(),
-            NFN.bin(), // main
-            0,         // <--*
-            0,         //    *-- native function address: i32 = 0
-            0,         //    |
-            0,         // <--*
-            LDC.bin(),
-            0, // <--*
-            0, //    *-- data constant address: i32 = 0
-            0, //    |
-            0, // <--*
+            NOP.bin(), // main
+            NFN.bin(), // print
+            0,
+            0,
+            0,
+            0,
+            NFN.bin(), // +
+            0,
+            0,
+            0,
+            1,
+            LDC.bin(), // 2
+            0,
+            0,
+            0,
+            0,
             APP.bin(),
-            LDC.bin(),
-            0, // <--*
-            0, //    *-- data constant address: i32 = 1
-            0, //    |
-            1, // <--*
+            LDC.bin(), // 40
+            0,
+            0,
+            0,
+            1,
             APP.bin(),
-            CALL.bin(),
+            CALL.bin(), // add 2 40 => 42
+            APP.bin(),
+            CALL.bin(), // print 42 => ()
             RET.bin(),
         ];
         let constants = vec![Object::Int(2), Object::Int(40)];
         let machine = Machine::new(code, constants);
         let mut thunk = Thunk::main(machine);
         let result = thunk.call();
-        assert_eq!(result.as_int().unwrap().to_owned(), 42);
+        assert_eq!(result, Object::Unit);
     }
 }
