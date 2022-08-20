@@ -13,6 +13,7 @@ pub struct Thunk {
     machine: Rc<Machine>,
     pub ret: bool,
     pub stack: Vec<Object>,
+    pub lets: Vec<Object>,
 }
 
 pub struct Machine {
@@ -42,7 +43,7 @@ impl io::Read for Thunk {
         self.machine
             .code
             .get(self.ip..)
-            .expect("failed to read ROM")
+            .expect("failed to read code")
             .read(buf)
             .and_then(|n| {
                 self.ip += n;
@@ -59,6 +60,7 @@ impl Thunk {
             machine,
             ret: false,
             stack: Vec::new(),
+            lets: Vec::new(),
         }
     }
 
@@ -71,11 +73,7 @@ impl Thunk {
     }
 
     pub fn constant(&self, index: usize) -> Object {
-        self.machine
-            .constants
-            .get(index)
-            .expect(&format!("failed to fetch data constant at index {}", index))
-            .clone()
+        self.machine.constants[index].clone()
     }
 
     fn cycle(&mut self) -> bool {
@@ -108,46 +106,53 @@ mod tests {
     #[test]
     fn it_works() {
         let code = vec![
-            NOP.bin(), // start
-            TASK.bin(),
-            0, // <--*
-            0, //    *-- main task address: i32 = 8
-            0, //    |
-            8, // <--*
-            CALL.bin(),
-            RET.bin(),
-            NOP.bin(), // main
-            NFN.bin(), // print
+            NOP.bin(),  // start : Task Int := main
+            TASK.bin(), // stack [main]
+            0,
+            0,
+            0,
+            8,
+            CALL.bin(), // stack [42]
+            RET.bin(),  // start => 42
+            NOP.bin(),  // main : Task Int := let i = 2 + 40 in print i >|> i
+            NFN.bin(),  // stack [print]
             0,
             0,
             0,
             0,
-            NFN.bin(), // +
-            0,
-            0,
-            0,
-            1,
-            LDC.bin(), // 2
-            0,
-            0,
-            0,
-            0,
-            APP.bin(),
-            LDC.bin(), // 40
+            NFN.bin(), // stack [print, +]
             0,
             0,
             0,
             1,
-            APP.bin(),
-            CALL.bin(), // add 2 40 => 42
-            APP.bin(),
-            CALL.bin(), // print 42 => ()
-            RET.bin(),
+            LDC.bin(), // stack [print, +, 2]
+            0,
+            0,
+            0,
+            0,
+            APP.bin(), // stack [print, (+ 2)]
+            LDC.bin(), // stack [print, (+ 2), 40]
+            0,
+            0,
+            0,
+            1,
+            APP.bin(),  // stack [print, (+ 2 40)]
+            CALL.bin(), // stack [print, 42]
+            DUP.bin(),  // stack [print, 42, 42]
+            STOL.bin(), // stack [print, 42]        | let [42]
+            APP.bin(),  // stack [(print 42)]       | let [42]
+            CALL.bin(), // stack []                 | let [42]
+            LDL.bin(),  // stack [42]               | let [42]
+            0,
+            0,
+            0,
+            0,
+            RET.bin(), // main => 42
         ];
         let constants = vec![Object::Int(2), Object::Int(40)];
         let machine = Machine::new(code, constants);
         let mut thunk = Thunk::main(machine);
         let result = thunk.call();
-        assert_eq!(result, Object::Unit);
+        assert_eq!(result, Object::Int(42));
     }
 }
