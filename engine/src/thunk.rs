@@ -105,49 +105,51 @@ mod tests {
 
     #[test]
     fn it_works() {
+        // main
+        //   :: Task Int
+        //   := let i := magic
+        //   in core.io.print i
+        //   >| core.task i
+        //
+        // magic :: Int := 2 + 40
         let code = vec![
-            NOP.bin(),  // start : Task Int := main
-            TASK.bin(), // stack [main]
+            NOP.bin(),  // main
+            TASK.bin(), // stack [@magic]
             0,
             0,
             0,
-            8,
+            18,
             CALL.bin(), // stack [42]
-            RET.bin(),  // start => 42
-            NOP.bin(),  // main : Task Int := let i = 2 + 40 in print i >|> i
-            NFN.bin(),  // stack [print]
+            DUP.bin(),  // stack [42, 42]
+            NFN.bin(),  // stack [42, 42, core.io.print]
             0,
             0,
             0,
             0,
-            NFN.bin(), // stack [print, +]
-            0,
-            0,
-            0,
-            1,
-            LDC.bin(), // stack [print, +, 2]
-            0,
-            0,
-            0,
-            0,
-            APP.bin(), // stack [print, (+ 2)]
-            LDC.bin(), // stack [print, (+ 2), 40]
+            FAP.bin(),  // stack [42, (core.io.print 42)]
+            CALL.bin(), // stack [42, ()]
+            DROP.bin(), // stack [42]
+            RET.bin(),  // main => 42
+            NOP.bin(),  // magic
+            NFN.bin(),  // stack [+]
             0,
             0,
             0,
             1,
-            APP.bin(),  // stack [print, (+ 2 40)]
-            CALL.bin(), // stack [print, 42]
-            DUP.bin(),  // stack [print, 42, 42]
-            STOL.bin(), // stack [print, 42]        | let [42]
-            APP.bin(),  // stack [(print 42)]       | let [42]
-            CALL.bin(), // stack []                 | let [42]
-            LDL.bin(),  // stack [42]               | let [42]
+            LDC.bin(), // stack [+, 2]
             0,
             0,
             0,
             0,
-            RET.bin(), // main => 42
+            APP.bin(), // stack [(+ 2)]
+            LDC.bin(), // stack [(+ 2), 40]
+            0,
+            0,
+            0,
+            1,
+            APP.bin(),  // stack [(+ 2 40)]
+            CALL.bin(), // stack [42]
+            RET.bin(),  // magic => 42
         ];
         let constants = vec![Object::Int(2), Object::Int(40)];
         let machine = Machine::new(code, constants);
