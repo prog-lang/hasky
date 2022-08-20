@@ -46,6 +46,14 @@ pub enum Opcode {
     /// ```
     APP,
 
+    /// Use object ontop of the data stack as a function that accepts a value
+    /// beneath it as an argument. This is just a faster way to FLIP + APP.
+    ///
+    /// ```text
+    /// Opcode: 0B
+    /// ```
+    FAP,
+
     /// Call function on top of the data stack and replace it with its return
     /// value.
     ///
@@ -81,12 +89,26 @@ pub enum Opcode {
     /// ```
     LDL,
 
-    /// Duplicate value on top of the stack.
+    /// Drop value from the top of the data stack.
+    ///
+    /// ```text
+    /// Opcode: 0B
+    /// ```
+    DROP,
+
+    /// Duplicate value on top of the data stack.
     ///
     /// ```text
     /// Opcode: 0B
     /// ```
     DUP,
+
+    /// Flip two top values on the data stack.
+    ///
+    /// ```text
+    /// Opcode: 0B
+    /// ```
+    FLIP,
 
     /// Return from a task.
     ///
@@ -133,6 +155,21 @@ pub const IS: [Instruction; Opcode::RET as usize + 1] = [
         func.apply(arg);
         thunk.stack.push(Object::Function(func));
     },
+    /* FAP */
+    |thunk| {
+        let mut func = thunk
+            .stack
+            .pop()
+            .expect("failed to call task from empty stack")
+            .into_function()
+            .expect("failed to apply argument to a non-functional object");
+        let arg = thunk
+            .stack
+            .pop()
+            .expect("failed to pop object from empty stack");
+        func.apply(arg);
+        thunk.stack.push(Object::Function(func));
+    },
     /* CALL */
     |thunk| {
         let mut func = thunk
@@ -168,6 +205,10 @@ pub const IS: [Instruction; Opcode::RET as usize + 1] = [
         let object = thunk.lets[addr as usize].clone();
         thunk.stack.push(object);
     },
+    /* DROP */
+    |thunk| {
+        thunk.stack.pop();
+    },
     /* DUP */
     |thunk| {
         let object = thunk
@@ -177,6 +218,19 @@ pub const IS: [Instruction; Opcode::RET as usize + 1] = [
         let clone = object.clone();
         thunk.stack.push(object);
         thunk.stack.push(clone);
+    },
+    /* FLIP */
+    |thunk| {
+        let first = thunk
+            .stack
+            .pop()
+            .expect("failed to pop object from empty stack");
+        let second = thunk
+            .stack
+            .pop()
+            .expect("failed to pop object from empty stack");
+        thunk.stack.push(first);
+        thunk.stack.push(second);
     },
     /* RET */ |thunk| thunk.ret = true,
 ];
