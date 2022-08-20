@@ -1,5 +1,6 @@
-use crate::object::{Callable, Object};
+use crate::object::{Call, Object};
 
+#[derive(Clone)]
 pub struct Lambda {
     args: Vec<Object>,
     eval: Eval,
@@ -7,7 +8,7 @@ pub struct Lambda {
 
 pub type Eval = fn(&Vec<Object>) -> Object;
 
-impl Callable for Lambda {
+impl Call for Lambda {
     fn apply(&mut self, o: Object) {
         self.args.push(o);
     }

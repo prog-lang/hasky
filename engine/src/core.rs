@@ -8,7 +8,7 @@ const CORE: [Eval; 1] = [/* + */ |args: &Vec<Object>| {
     let x = args[0]
         .as_int()
         .expect("encountered type mismatch during argument conversion");
-    let y = args[0]
+    let y = args[1]
         .as_int()
         .expect("encountered type mismatch during argument conversion");
     Object::Int(x + y)

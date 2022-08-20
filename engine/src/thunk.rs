@@ -4,8 +4,9 @@ use std::rc::Rc;
 use byteorder::ReadBytesExt;
 
 use crate::internal::Opcode;
-use crate::object::{Callable, Object};
+use crate::object::{Call, Object};
 
+#[derive(Clone)]
 pub struct Thunk {
     args: Vec<Object>,
     ip: usize,
@@ -16,15 +17,16 @@ pub struct Thunk {
 
 pub struct Machine {
     code: Vec<u8>,
+    constants: Vec<Object>,
 }
 
 impl Machine {
-    pub fn new(code: Vec<u8>) -> Self {
-        Self { code }
+    pub fn new(code: Vec<u8>, constants: Vec<Object>) -> Self {
+        Self { code, constants }
     }
 }
 
-impl Callable for Thunk {
+impl Call for Thunk {
     fn apply(&mut self, o: Object) {
         self.args.push(o);
     }
@@ -50,22 +52,30 @@ impl io::Read for Thunk {
 }
 
 impl Thunk {
-    pub fn new(env: Rc<Machine>, ip: usize) -> Self {
+    pub fn new(machine: Rc<Machine>, ip: usize) -> Self {
         Self {
             args: Vec::new(),
-            ip: ip,
-            machine: env,
+            ip,
+            machine,
             ret: false,
             stack: Vec::new(),
         }
     }
 
-    pub fn main(env: Machine) -> Self {
-        Self::new(Rc::new(env), 0)
+    pub fn main(machine: Machine) -> Self {
+        Self::new(Rc::new(machine), 0)
     }
 
-    pub fn task(&self, ip: usize) -> Self {
+    pub fn subtask(&self, ip: usize) -> Self {
         Thunk::new(self.machine.clone(), ip)
+    }
+
+    pub fn constant(&self, index: usize) -> Object {
+        self.machine
+            .constants
+            .get(index)
+            .expect(&format!("failed to fetch data constant at index {}", index))
+            .clone()
     }
 
     fn cycle(&mut self) -> bool {
@@ -92,7 +102,7 @@ mod tests {
     use super::{Machine, Thunk};
     use crate::{
         internal::Opcode::*,
-        object::{Callable, Object},
+        object::{Call, Object},
     };
 
     #[test]
@@ -111,15 +121,25 @@ mod tests {
             0,         //    *-- native function address: i32 = 0
             0,         //    |
             0,         // <--*
+            LDC.bin(),
+            0, // <--*
+            0, //    *-- data constant address: i32 = 0
+            0, //    |
+            0, // <--*
+            APP.bin(),
+            LDC.bin(),
+            0, // <--*
+            0, //    *-- data constant address: i32 = 1
+            0, //    |
+            1, // <--*
+            APP.bin(),
+            CALL.bin(),
             RET.bin(),
         ];
-        let env = Machine::new(code);
-        let mut thunk = Thunk::main(env);
+        let constants = vec![Object::Int(2), Object::Int(40)];
+        let machine = Machine::new(code, constants);
+        let mut thunk = Thunk::main(machine);
         let result = thunk.call();
-        assert!(match result {
-            Object::Function(_) => Ok(()),
-            _ => Err(()),
-        }
-        .is_ok())
+        assert_eq!(result.as_int().unwrap().to_owned(), 42);
     }
 }

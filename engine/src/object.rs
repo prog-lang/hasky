@@ -3,19 +3,44 @@ use std::fmt::Debug;
 
 use enum_as_inner::EnumAsInner;
 
+use crate::lambda::Lambda;
+use crate::thunk::Thunk;
+
 /// Objects are primary units of intormation upon which we operate. They can lie
 /// on the data stack or be part of machine data constants. Functions receive
 /// arguments as objects and *always* return an object.
-#[derive(EnumAsInner)]
+#[derive(EnumAsInner, Clone)]
 pub enum Object {
     Unit,
     Int(i32),
-    Function(Box<dyn Callable>),
+    Function(Callable),
 }
 
-pub trait Callable {
+#[derive(Clone)]
+pub enum Callable {
+    Lambda(Lambda),
+    Thunk(Thunk),
+}
+
+pub trait Call {
     fn apply(&mut self, o: Object);
     fn call(&mut self) -> Object;
+}
+
+impl Call for Callable {
+    fn apply(&mut self, o: Object) {
+        match self {
+            Self::Lambda(lambda) => lambda.apply(o),
+            Self::Thunk(thunk) => thunk.apply(o),
+        }
+    }
+
+    fn call(&mut self) -> Object {
+        match self {
+            Self::Lambda(lambda) => lambda.call(),
+            Self::Thunk(thunk) => thunk.call(),
+        }
+    }
 }
 
 impl Debug for Object {

@@ -1,6 +1,11 @@
 use byteorder::{BigEndian, ReadBytesExt};
 
-use crate::{core, lambda::Lambda, object::Object, thunk::Thunk};
+use crate::{
+    core,
+    lambda::Lambda,
+    object::{Call, Callable, Object},
+    thunk::Thunk,
+};
 
 pub type Instruction = fn(&mut Thunk);
 
@@ -16,7 +21,7 @@ pub enum Opcode {
     /// Push native function onto the data stack.
     ///
     /// ```text
-    /// Opcode: 8B
+    /// Opcode: 4B
     /// *------------------------------*
     /// | native function address: u32 |
     /// *------------------------------*
@@ -26,20 +31,38 @@ pub enum Opcode {
     /// Initialise a thunk and push it onto the data stack.
     ///
     /// ```text
-    /// Opcode: 8B
+    /// Opcode: 4B
     /// *-------------------------------*
     /// | task instruction address: u32 |
     /// *-------------------------------*
     /// ```
     TASK,
 
-    /// Call function on top of the data stack and replace it with its return
-    /// value.
+    /// Use object ontop of the data stack as an argument to the function that
+    /// lies beneath it.
     ///
     /// ```text
     /// Opcode: 0B
     /// ```
+    APP,
+
+    /// Call function on top of the data stack and replace it with its return
+    /// value.
+    ///
+    /// ```text
+    /// Opcode: 4B
+    /// *----------------------------*
+    /// | data constant address: u32 |
+    /// *----------------------------*
+    /// ```
     CALL,
+
+    /// Load machine constant onto the data stack.
+    ///
+    /// ```text
+    /// Opcode: 0B
+    /// ```
+    LDC,
 
     /// Return from a task.
     ///
@@ -61,27 +84,49 @@ pub const IS: [Instruction; Opcode::RET as usize + 1] = [
         let eval = core::eval_from_addr(addr as usize);
         thunk
             .stack
-            .push(Object::Function(Box::new(Lambda::new(eval))))
+            .push(Object::Function(Callable::Lambda(Lambda::new(eval))))
     },
     /* TASK */
     |thunk| {
         let addr = thunk
             .read_u32::<BigEndian>()
             .expect("failed to read task instruction address");
-        let task = thunk.task(addr as usize);
-        thunk.stack.push(Object::Function(Box::new(task)));
+        let task = thunk.subtask(addr as usize);
+        thunk.stack.push(Object::Function(Callable::Thunk(task)));
+    },
+    /* APP */
+    |thunk| {
+        let arg = thunk
+            .stack
+            .pop()
+            .expect("failed to pop object from empty stack");
+        let mut func = thunk
+            .stack
+            .pop()
+            .expect("failed to call task from empty stack")
+            .into_function()
+            .expect("failed to apply argument to a non-functional object");
+        func.apply(arg);
+        thunk.stack.push(Object::Function(func));
     },
     /* CALL */
     |thunk| {
-        let top = thunk
+        let mut func = thunk
             .stack
             .pop()
-            .expect("failed to call task from empty stack");
-        let mut func = top
+            .expect("failed to call task from empty stack")
             .into_function()
             .expect("failed to call non-functional object");
         let return_value = func.call();
         thunk.stack.push(return_value);
+    },
+    /* LDC */
+    |thunk| {
+        let addr = thunk
+            .read_u32::<BigEndian>()
+            .expect("failed to read data constant address");
+        let constant = thunk.constant(addr as usize);
+        thunk.stack.push(constant);
     },
     /* RET */ |thunk| thunk.ret = true,
 ];
