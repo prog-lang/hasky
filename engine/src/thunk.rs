@@ -64,6 +64,10 @@ impl Thunk {
         Self::new(Rc::new(env), 0)
     }
 
+    pub fn task(&self, ip: usize) -> Self {
+        Thunk::new(self.machine.clone(), ip)
+    }
+
     fn cycle(&mut self) -> bool {
         let opcode = self.fetch();
         let instruction = Opcode::decode(opcode);
@@ -94,12 +98,19 @@ mod tests {
     #[test]
     fn it_works() {
         let code = vec![
-            NOP.bin(),
-            NFN.bin(),
+            NOP.bin(), // start
+            TASK.bin(),
             0, // <--*
-            0, //    *-- native function address: i32 = 0
+            0, //    *-- main task address: i32 = 8
             0, //    |
-            0, // <--*
+            8, // <--*
+            CALL.bin(),
+            RET.bin(),
+            NFN.bin(), // main
+            0,         // <--*
+            0,         //    *-- native function address: i32 = 0
+            0,         //    |
+            0,         // <--*
             RET.bin(),
         ];
         let env = Machine::new(code);

@@ -13,17 +13,35 @@ pub enum Opcode {
     /// ```
     NOP,
 
-    /// Push native function onto the stack.
+    /// Push native function onto the data stack.
     ///
     /// ```text
-    /// Opcode: 16B
-    /// *------------------------------*------------------------------*
-    /// | native function address: u32 | function argument count: u32 |
-    /// *------------------------------*------------------------------*
+    /// Opcode: 8B
+    /// *------------------------------*
+    /// | native function address: u32 |
+    /// *------------------------------*
     /// ```
     NFN,
 
-    /// Return from function.
+    /// Initialise a thunk and push it onto the data stack.
+    ///
+    /// ```text
+    /// Opcode: 8B
+    /// *-------------------------------*
+    /// | task instruction address: u32 |
+    /// *-------------------------------*
+    /// ```
+    TASK,
+
+    /// Call function on top of the data stack and replace it with its return
+    /// value.
+    ///
+    /// ```text
+    /// Opcode: 0B
+    /// ```
+    CALL,
+
+    /// Return from a task.
     ///
     /// ```text
     /// Opcode: 0B
@@ -31,8 +49,6 @@ pub enum Opcode {
     RET,
     // RET must remain the last Opcode.
 }
-
-pub const OPCODE_BYTE_LENGTH: usize = 1;
 
 /// Instrustion set.
 pub const IS: [Instruction; Opcode::RET as usize + 1] = [
@@ -46,6 +62,26 @@ pub const IS: [Instruction; Opcode::RET as usize + 1] = [
         thunk
             .stack
             .push(Object::Function(Box::new(Lambda::new(eval))))
+    },
+    /* TASK */
+    |thunk| {
+        let addr = thunk
+            .read_u32::<BigEndian>()
+            .expect("failed to read task instruction address");
+        let task = thunk.task(addr as usize);
+        thunk.stack.push(Object::Function(Box::new(task)));
+    },
+    /* CALL */
+    |thunk| {
+        let top = thunk
+            .stack
+            .pop()
+            .expect("failed to call task from empty stack");
+        let mut func = top
+            .into_function()
+            .expect("failed to call non-functional object");
+        let return_value = func.call();
+        thunk.stack.push(return_value);
     },
     /* RET */ |thunk| thunk.ret = true,
 ];
