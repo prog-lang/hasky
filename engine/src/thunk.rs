@@ -7,14 +7,10 @@ use crate::internal::Opcode;
 use crate::object::{Callable, Object};
 
 pub struct Thunk {
-    argc: usize,
-    argi: usize,
-    pub args: Vec<Object>,
-
-    pub machine: Rc<Machine>,
+    args: Vec<Object>,
     ip: usize,
+    machine: Rc<Machine>,
     pub ret: bool,
-
     pub stack: Vec<Object>,
 }
 
@@ -30,10 +26,7 @@ impl Machine {
 
 impl Callable for Thunk {
     fn apply(&mut self, o: Object) {
-        if self.argi >= self.argc {
-            panic!("encountered argument overflow during application")
-        }
-        self.feed(o);
+        self.args.push(o);
     }
 
     fn call(&mut self) -> Object {
@@ -57,29 +50,24 @@ impl io::Read for Thunk {
 }
 
 impl Thunk {
-    pub fn new(env: Rc<Machine>, argc: usize, ip: usize) -> Self {
+    pub fn new(env: Rc<Machine>, ip: usize) -> Self {
         Self {
-            argc: argc,
-            argi: 0,
-            args: vec![],
-            machine: env,
+            args: Vec::new(),
             ip: ip,
+            machine: env,
             ret: false,
-            stack: vec![],
+            stack: Vec::new(),
         }
     }
 
     pub fn main(env: Machine) -> Self {
-        Self::new(Rc::new(env), 0, 0)
-    }
-
-    fn feed(&mut self, o: Object) {
-        self.argi += 1;
-        self.args.push(o);
+        Self::new(Rc::new(env), 0)
     }
 
     fn cycle(&mut self) -> bool {
-        Opcode::decode(self.fetch())(self);
+        let opcode = self.fetch();
+        let instruction = Opcode::decode(opcode);
+        instruction(self);
         !self.ret
     }
 
