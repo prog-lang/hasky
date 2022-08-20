@@ -46,9 +46,10 @@ impl Call for Callable {
 impl Debug for Object {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::Unit => write!(f, "Unit"),
-            Self::Int(arg0) => f.debug_tuple("Int").field(arg0).finish(),
-            Self::Function(_) => write!(f, "Fn"),
+            Self::Unit => write!(f, "()"),
+            Self::Int(i) => write!(f, "{}", i),
+            Self::Function(Callable::Lambda(_)) => write!(f, "<Native Function>"),
+            Self::Function(Callable::Thunk(_)) => write!(f, "<Function>"),
         }
     }
 }
