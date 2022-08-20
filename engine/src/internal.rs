@@ -64,6 +64,30 @@ pub enum Opcode {
     /// ```
     LDC,
 
+    /// Store object as a local persistent value (let).
+    ///
+    /// ```text
+    /// Opcode: 0B
+    /// ```
+    STOL,
+
+    /// Load local persisten value.
+    ///
+    /// ```text
+    /// Opcode: 4B
+    /// *--------------------------*
+    /// | local value address: u32 |
+    /// *--------------------------*
+    /// ```
+    LDL,
+
+    /// Duplicate value on top of the stack.
+    ///
+    /// ```text
+    /// Opcode: 0B
+    /// ```
+    DUP,
+
     /// Return from a task.
     ///
     /// ```text
@@ -127,6 +151,32 @@ pub const IS: [Instruction; Opcode::RET as usize + 1] = [
             .expect("failed to read data constant address");
         let constant = thunk.constant(addr as usize);
         thunk.stack.push(constant);
+    },
+    /* STOL */
+    |thunk| {
+        let object = thunk
+            .stack
+            .pop()
+            .expect("failed to call task from empty stack");
+        thunk.lets.push(object);
+    },
+    /* LDL */
+    |thunk| {
+        let addr = thunk
+            .read_u32::<BigEndian>()
+            .expect("failed to read local value address");
+        let object = thunk.lets[addr as usize].clone();
+        thunk.stack.push(object);
+    },
+    /* DUP */
+    |thunk| {
+        let object = thunk
+            .stack
+            .pop()
+            .expect("failed to call task from empty stack");
+        let clone = object.clone();
+        thunk.stack.push(object);
+        thunk.stack.push(clone);
     },
     /* RET */ |thunk| thunk.ret = true,
 ];
