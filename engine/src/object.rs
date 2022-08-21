@@ -1,6 +1,7 @@
 use std::fmt;
 use std::fmt::Debug;
 
+use byteorder::{BigEndian, ReadBytesExt};
 use enum_as_inner::EnumAsInner;
 
 use crate::lambda::Lambda;
@@ -25,6 +26,20 @@ pub enum Callable {
 pub trait Call {
     fn apply(&mut self, o: Object);
     fn call(&mut self) -> Object;
+}
+
+impl Object {
+    pub fn read_constant<R>(bc: &mut R) -> Self
+    where
+        R: ReadBytesExt,
+    {
+        let const_type = bc.read_u8().expect("failed to read constant type");
+        match const_type {
+            0 => Self::Unit,
+            1 => Self::Int(bc.read_i32::<BigEndian>().expect("failed to read Int")),
+            _ => panic!("unknown constant type"),
+        }
+    }
 }
 
 impl Call for Callable {
