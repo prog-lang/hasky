@@ -4,6 +4,7 @@ use std::rc::Rc;
 use byteorder::ReadBytesExt;
 
 use crate::internal::Opcode;
+use crate::machine::Machine;
 use crate::object::{Call, Object};
 
 #[derive(Clone)]
@@ -14,17 +15,6 @@ pub struct Thunk {
     pub ret: bool,
     pub stack: Vec<Object>,
     pub lets: Vec<Object>,
-}
-
-pub struct Machine {
-    code: Vec<u8>,
-    constants: Vec<Object>,
-}
-
-impl Machine {
-    pub fn new(code: Vec<u8>, constants: Vec<Object>) -> Self {
-        Self { code, constants }
-    }
 }
 
 impl Call for Thunk {
@@ -104,7 +94,7 @@ mod tests {
     };
 
     #[test]
-    fn it_works() {
+    fn can_execute_instructions() {
         // main
         //   :: Task Int
         //   := let i := magic
