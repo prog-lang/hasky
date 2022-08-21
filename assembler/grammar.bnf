@@ -1,8 +1,9 @@
 grammar = { EOF } | statement grammar
 statement = section | constant | instruction
-section = "." { identifier } "\n"
-constant = tag literal "\n"
-instruction = tag? { opcode } operand* "\n"
+section = "." { identifier } ";"
+constant = tag literal ";"
+instruction = tag? opcode operand* ";"
 tag = { identifier } ":"
 literal = { integer }
+opcode = { identifier }
 operand = { identifier }
