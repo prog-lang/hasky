@@ -1,8 +1,15 @@
-grammar = { EOF } | statement grammar
+grammar = { EOF } | module exports statement grammar
+
+module = "module" identifier ";"
+
+exports = { empty } | "export" identifier exports
+
 statement = section | constant | instruction
-section = "." { identifier } ";"
+
+section = "section" { identifier } ";"
 constant = tag literal ";"
 instruction = tag? opcode operand* ";"
+
 tag = { identifier } ":"
 literal = { integer }
 opcode = { identifier }

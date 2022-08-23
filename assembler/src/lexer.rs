@@ -11,6 +11,15 @@ enum Token {
     #[token(";")]
     Semicolon,
 
+    #[token("module")]
+    Module,
+
+    #[token("export")]
+    Export,
+
+    #[token("section")]
+    Section,
+
     #[regex(r"-?\d+", |i| i.slice().parse())]
     Integer(i32),
 
@@ -31,16 +40,31 @@ mod tests {
     #[test]
     fn it_works() {
         let mut lex = Token::lexer(r"
-        .data
+        module main;
+        export main;
+
+        section data;
         n: -42;
-        .text
+
+        section text;
         nop;
         ret;
         ");
 
-        assert_eq!(lex.next(), Some(Token::Dot));
+        assert_eq!(lex.next(), Some(Token::Module));
+        assert_eq!(lex.next(), Some(Token::Identifier));
+        assert_eq!(lex.slice(), "main");
+        assert_eq!(lex.next(), Some(Token::Semicolon));
+
+        assert_eq!(lex.next(), Some(Token::Export));
+        assert_eq!(lex.next(), Some(Token::Identifier));
+        assert_eq!(lex.slice(), "main");
+        assert_eq!(lex.next(), Some(Token::Semicolon));
+
+        assert_eq!(lex.next(), Some(Token::Section));
         assert_eq!(lex.next(), Some(Token::Identifier));
         assert_eq!(lex.slice(), "data");
+        assert_eq!(lex.next(), Some(Token::Semicolon));
 
         assert_eq!(lex.next(), Some(Token::Identifier));
         assert_eq!(lex.slice(), "n");
@@ -48,9 +72,10 @@ mod tests {
         assert_eq!(lex.next(), Some(Token::Integer(-42)));
         assert_eq!(lex.next(), Some(Token::Semicolon));
 
-        assert_eq!(lex.next(), Some(Token::Dot));
+        assert_eq!(lex.next(), Some(Token::Section));
         assert_eq!(lex.next(), Some(Token::Identifier));
         assert_eq!(lex.slice(), "text");
+        assert_eq!(lex.next(), Some(Token::Semicolon));
 
         assert_eq!(lex.next(), Some(Token::Identifier));
         assert_eq!(lex.slice(), "nop");
