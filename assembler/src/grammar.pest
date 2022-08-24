@@ -1,0 +1,15 @@
+WHITESPACE = _{ " " | "\t" | "\n" }
+A = { 'a'..'z' | 'A'..'Z' }
+D = { '0'..'9' }
+N = { '1'..'9' }
+I = @{ "0" | ("-"? ~ N ~ D*) }
+ID = @{ A ~ (A | D)* }
+TAG = { ID ~ ":" }
+
+file = { SOI ~ module ~ statement* ~ EOI }
+module = { "module" ~ ID ~ ";" }
+statement = { (export | constant | instruction) ~ ";" }
+export = { "export" ~ ID }
+constant = { "const" ~ TAG ~ literal }
+instruction = { TAG? ~ ID ~ ID* }
+literal = { I }
